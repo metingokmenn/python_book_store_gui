@@ -1,48 +1,61 @@
 import tkinter as tk
+from tkinter import ttk
+import main_screen as ms
 
-def on_resize(event):
-    win.columnconfigure(0, weight=1)
-    win.columnconfigure(1, weight=1)
-    win.rowconfigure(0, weight=1)
-    win.rowconfigure(1, weight=1)
-    win.rowconfigure(2, weight=1)
-    win.rowconfigure(3, weight=1)
-    win.rowconfigure(4, weight=1)
+class LoginScreen:
+    def __init__(self):
+        self.win = tk.Tk()
+        self.win.geometry("300x200")
+        self.win.eval('tk::PlaceWindow . center')
+        self.win.resizable(False, False)
+        self.win.title('Login')
+        self.win.bind("<Configure>", self.onResize)
+        self.username = tk.StringVar()
+        self.password = tk.StringVar()
+        self.usernameLabel = None
+        self.usernameEntry = None
+        self.passwordLabel = None
+        self.passwordEntry = None
+        self.loginButton = None
+        self.create_widgets()
 
-def isAdmin():
-    if(usernameEntry.get() == "admin" and passwordEntry.get() == "12345"):
-        print("Admin has logged in.")
-        win.destroy()
-    elif(usernameEntry.get() == "user" and passwordEntry.get() == "67890"):
-        print("User has logged in.") 
-        win.destroy()
-    else:
-        print("Invalid username")          
+    def create_widgets(self):
+        self.usernameLabel = tk.Label(self.win, text="User Name")
+        self.usernameLabel.grid(row=0, column=0, sticky="ew")
+        self.usernameEntry = tk.Entry(self.win, textvariable=self.username, width=20)
+        self.usernameEntry.grid(row=0, column=1)
+        self.passwordLabel = tk.Label(self.win, text="Password")
+        self.passwordLabel.grid(row=1, column=0, sticky="ew")
+        self.passwordEntry = tk.Entry(self.win, textvariable=self.password, show='*')
+        self.passwordEntry.grid(row=1, column=1)
+        self.loginButton = tk.Button(self.win, text="Login", command=self.isAdmin)
+        self.loginButton.grid(row=4, column=0, columnspan=2, sticky="ew")
 
-win = tk.Tk()
-win.geometry("300x200")
-win.eval('tk::PlaceWindow . center')
-win.resizable(False,False)
-win.title('Login')
+    def isAdmin(self):
+        if self.usernameEntry.get() == "admin" and self.passwordEntry.get() == "12345":
+            print("Admin has logged in.")
+            self.navigateToMainScreen()
+            self.win.destroy()
+        elif self.usernameEntry.get() == "user" and self.passwordEntry.get() == "67890":
+            print("User has logged in.")
+            self.navigateToMainScreen()
+            self.win.destroy()
+        else:
+            print("Invalid username")
 
-win.bind("<Configure>", on_resize)
+    def onResize(self, event):
+        self.win.columnconfigure(0, weight=1)
+        self.win.columnconfigure(1, weight=1)
+        self.win.rowconfigure(0, weight=1)
+        self.win.rowconfigure(1, weight=1)
+        self.win.rowconfigure(2, weight=1)
+        self.win.rowconfigure(3, weight=1)
+        self.win.rowconfigure(4, weight=1)
+        self.win.minsize(self.win.winfo_width(), self.win.winfo_height())
 
-usernameLabel = tk.Label(win, text="User Name")
-usernameLabel.grid(row=0, column=0, sticky="ew")
-username = tk.StringVar()
-usernameEntry = tk.Entry(win, textvariable=username, width=20)
-usernameEntry.grid(row=0, column=1)
+    def navigateToMainScreen(self):
+        self.win2 = ms.MainScreen(self)
+        self.win2.grab_set()
 
-passwordLabel = tk.Label(win, text="Password")
-passwordLabel.grid(row=1, column=0, sticky="ew")
-password = tk.StringVar()
-passwordEntry = tk.Entry(win, textvariable=password, show='*')
-passwordEntry.grid(row=1, column=1)
-
-loginButton = tk.Button(win, text="Login", command=isAdmin)
-loginButton.grid(row=4, column=0, columnspan=2, sticky="ew")
-
-win.update_idletasks()
-win.minsize(win.winfo_width(), win.winfo_height())
-
-win.mainloop()
+app = LoginScreen()
+app.win.mainloop()
