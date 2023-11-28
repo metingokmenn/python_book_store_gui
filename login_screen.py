@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 import main_screen as ms
 
+
 class LoginScreen:
     def __init__(self):
         self.win = tk.Tk()
@@ -33,7 +34,6 @@ class LoginScreen:
 
     def isAdmin(self):
         if self.usernameEntry.get() == "admin" and self.passwordEntry.get() == "12345":
-            print("Admin has logged in.")
             self.navigateToMainScreen()
             self.win.destroy()
         elif self.usernameEntry.get() == "user" and self.passwordEntry.get() == "67890":
@@ -56,6 +56,7 @@ class LoginScreen:
     def navigateToMainScreen(self):
         self.win2 = ms.MainScreen(self)
         self.win2.grab_set()
+
 
 app = LoginScreen()
 app.win.mainloop()
