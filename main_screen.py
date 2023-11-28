@@ -16,9 +16,9 @@ class MainScreen(tk.Toplevel):
         self.book_list = []  # Her bir kitap öğesini içeren liste
         self.list_box = tk.Listbox(self.win, height=50, width=50, selectmode='SINGLE')
         self.bottom_frame = tk.Frame(self.win)
-        self.book_id_label = ttk.Label(self.bottom_frame, text=f"Book id: ")
-        self.book_name_label = ttk.Label(self.bottom_frame, text=f"Book name: ")
-        self.author_name_label = ttk.Label(self.bottom_frame, text=f"Author name: ")
+        self.book_id_label = ttk.Label(self.bottom_frame, text=f"Book id: ", font=("Times", "16", "bold"))
+        self.book_name_label = ttk.Label(self.bottom_frame, text=f"Book name: ", font=("Times", "16", "bold"))
+        self.author_name_label = ttk.Label(self.bottom_frame, text=f"Author name: ", font=("Times", "16", "bold"))
         self.list_box.bind("<ButtonRelease-1>", self.on_item_select)
 
         if parent.usernameEntry.get() == "user":
