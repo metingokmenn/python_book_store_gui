@@ -20,6 +20,7 @@ class MainScreen(tk.Toplevel):
         self.book_name_label = ttk.Label(self.bottom_frame, text=f"Book name: ", font=("Times", "16", "bold"))
         self.author_name_label = ttk.Label(self.bottom_frame, text=f"Author name: ", font=("Times", "16", "bold"))
         self.list_box.bind("<ButtonRelease-1>", self.on_item_select)
+        self.selected_item_index = None
 
         if parent.usernameEntry.get() == "user":
             print("User logged")
@@ -52,6 +53,29 @@ class MainScreen(tk.Toplevel):
             # Güncelleme sonrasında seçilen öğeyi güncelle
             self.on_item_select(None)
 
+    def update_book_ids_after_delete(self, deleted_index):
+        # Silinen öğeden sonraki tüm öğelerin ID'lerini güncelle
+        for i in range(deleted_index, len(self.parent.book_list)):
+            self.parent.book_list[i].id = i + 1
+
+    def delete_book(self):
+        if not self.selected_item_index:
+            messagebox.showinfo("Error", "Please select a book to delete.")
+            return
+
+        deleted_index = self.selected_item_index[0]
+        self.list_box.delete(deleted_index)
+        deleted_book = self.book_list.pop(deleted_index)
+        self.update_book_ids_after_delete(deleted_index)
+        self.selected_item_index = None
+
+        if not self.selected_item_index:
+            messagebox.showinfo("Success", f"Book '{deleted_book.name}' deleted successfully.")
+
+        # Güncelleme: Silinen öğeden sonraki tüm öğelerin ID'lerini güncelle
+        for i in range(deleted_index, len(self.book_list)):
+            self.book_list[i].id = i + 1
+
     def list_maker(self):
         for i in range(50):
             book_info = Book(i + 1, f"Book Label", f"Author")
@@ -66,12 +90,15 @@ class MainScreen(tk.Toplevel):
         self.author_name_label.pack(padx=(0, 500), pady=(20, 0), anchor="nw")
         self.list_box.pack(pady=(20, 0), padx=(20, 0), anchor="nw")
 
-        # Add Book button
-        self.add_book_button = tk.Button(self.bottom_frame, text="Add Book", command=self.add_book)
-        self.add_book_button.pack(side=tk.TOP)
-        # Edit Book button
-        self.edit_book_button = tk.Button(self.bottom_frame, text="Edit Book", command=self.edit_book)
-        self.edit_book_button.pack(side=tk.TOP)
+        if self.parent.usernameEntry.get() == "admin":
+            self.add_book_button = tk.Button(self.bottom_frame, text="Add Book", command=self.add_book)
+            self.add_book_button.pack(side=tk.TOP)
+            self.edit_book_button = tk.Button(self.bottom_frame, text="Edit Book", command=self.edit_book)
+            self.edit_book_button.pack(side=tk.TOP)
+
+            self.delete_book_button = tk.Button(self.bottom_frame, text="Delete Book", command=self.delete_book)
+            self.delete_book_button.pack(side=tk.TOP)
+
 
         self.list_maker()
 
