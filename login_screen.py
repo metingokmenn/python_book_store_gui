@@ -1,5 +1,4 @@
 import tkinter as tk
-from tkinter import ttk
 import main_screen as ms
 
 
@@ -10,7 +9,7 @@ class LoginScreen:
         self.win.eval('tk::PlaceWindow . center')
         self.win.resizable(False, False)
         self.win.title('Login')
-        self.win.bind("<Configure>", self.onResize)
+        self.win.bind("<Configure>", self.on_resize)
         self.username = tk.StringVar()
         self.password = tk.StringVar()
         self.usernameLabel = None
@@ -29,21 +28,21 @@ class LoginScreen:
         self.passwordLabel.grid(row=1, column=0, sticky="ew")
         self.passwordEntry = tk.Entry(self.win, textvariable=self.password, show='*')
         self.passwordEntry.grid(row=1, column=1)
-        self.loginButton = tk.Button(self.win, text="Login", command=self.isAdmin)
+        self.loginButton = tk.Button(self.win, text="Login", command=self.is_admin)
         self.loginButton.grid(row=4, column=0, columnspan=2, sticky="ew")
 
-    def isAdmin(self):
+    def is_admin(self):
         if self.usernameEntry.get() == "admin" and self.passwordEntry.get() == "12345":
-            self.navigateToMainScreen()
+            self.navigate_to_main_screen()
             self.win.destroy()
         elif self.usernameEntry.get() == "user" and self.passwordEntry.get() == "67890":
             print("User has logged in.")
-            self.navigateToMainScreen()
+            self.navigate_to_main_screen()
             self.win.destroy()
         else:
             print("Invalid username")
 
-    def onResize(self, event):
+    def on_resize(self, event):
         self.win.columnconfigure(0, weight=1)
         self.win.columnconfigure(1, weight=1)
         self.win.rowconfigure(0, weight=1)
@@ -53,7 +52,7 @@ class LoginScreen:
         self.win.rowconfigure(4, weight=1)
         self.win.minsize(self.win.winfo_width(), self.win.winfo_height())
 
-    def navigateToMainScreen(self):
+    def navigate_to_main_screen(self):
         self.win2 = ms.MainScreen(self)
         self.win2.grab_set()
 

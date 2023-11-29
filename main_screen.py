@@ -23,9 +23,9 @@ class MainScreen(tk.Toplevel):
         self.selected_item_index = None
 
         if parent.usernameEntry.get() == "user":
-            print("User logged")
+            print("user logged in")
         elif parent.usernameEntry.get() == "admin":
-            print("Admin logged")
+            print("admin logged in")
 
         self.create_widgets()
 
@@ -105,9 +105,6 @@ class MainScreen(tk.Toplevel):
             self.edit_book_button.pack(side=tk.TOP)
             self.delete_book_button = tk.Button(self.bottom_frame, text="Delete Book", state=tk.DISABLED)
             self.delete_book_button.pack(side=tk.TOP)
-
-        self.list_maker()
-
 
         self.list_maker()
 
