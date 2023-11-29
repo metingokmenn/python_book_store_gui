@@ -98,6 +98,16 @@ class MainScreen(tk.Toplevel):
 
             self.delete_book_button = tk.Button(self.bottom_frame, text="Delete Book", command=self.delete_book)
             self.delete_book_button.pack(side=tk.TOP)
+        else:
+            # Admin değilse, düğmeleri devre dışı bırak
+            self.add_book_button = tk.Button(self.bottom_frame, text="Add Book", state=tk.DISABLED)
+            self.add_book_button.pack(side=tk.TOP)
+            self.edit_book_button = tk.Button(self.bottom_frame, text="Edit Book", state=tk.DISABLED)
+            self.edit_book_button.pack(side=tk.TOP)
+            self.delete_book_button = tk.Button(self.bottom_frame, text="Delete Book", state=tk.DISABLED)
+            self.delete_book_button.pack(side=tk.TOP)
+
+        self.list_maker()
 
 
         self.list_maker()
