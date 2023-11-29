@@ -69,7 +69,7 @@ class MainScreen(tk.Toplevel):
         self.update_book_ids_after_delete(deleted_index)
         self.selected_item_index = None
 
-        if not self.selected_item_index:
+        if  self.selected_item_index:
             messagebox.showinfo("Success", f"Book '{deleted_book.name}' deleted successfully.")
 
         # Güncelleme: Silinen öğeden sonraki tüm öğelerin ID'lerini güncelle
@@ -117,7 +117,9 @@ class MainScreen(tk.Toplevel):
         author_name = simpledialog.askstring("Add Book", "Enter the author name:")
 
         if book_name and author_name is not None:
-            book_info = Book(len(self.book_list) + 1, book_name, author_name)
+            max_id = max(book.id for book in self.book_list) if self.book_list else 0
+            new_book_id = max_id + 1
+            book_info = Book(new_book_id, book_name, author_name)
             self.book_list.append(book_info)
             display_text = f"Book: {book_info.name} - Author: {book_info.author} - ID: {book_info.id}"
             self.list_box.insert(tk.END, display_text)
