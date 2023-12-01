@@ -1,3 +1,4 @@
+
 from tkinter import simpledialog, messagebox
 import tkinter as tk
 from tkinter import ttk
@@ -7,12 +8,14 @@ from full_screen import full_screen
 
 class MainScreen(tk.Toplevel):
     def __init__(self, parent):
+
         super().__init__()
         self.parent = parent
         self.win = tk.Tk()
         self.win.title('Main Screen')
         self.win.geometry(full_screen(self.win))
         self.win.resizable(True, True)
+
         self.book_list = []  # Her bir kitap öğesini içeren liste
         self.list_box = tk.Listbox(self.win, height=50, width=50, selectmode='SINGLE')
         self.bottom_frame = tk.Frame(self.win)
@@ -83,12 +86,14 @@ class MainScreen(tk.Toplevel):
             display_text = f"{book_info.name} - {book_info.author} - ID: {book_info.id}"
             self.list_box.insert(tk.END, display_text)
 
+
     def create_widgets(self):
         self.bottom_frame.pack(side=tk.RIGHT, anchor="ne", pady=(20, 0), padx=(0, 20))
         self.book_id_label.pack(padx=(0, 500), pady=(20, 0), anchor="nw")
         self.book_name_label.pack(padx=(0, 500), pady=(20, 0), anchor="nw")
         self.author_name_label.pack(padx=(0, 500), pady=(20, 0), anchor="nw")
         self.list_box.pack(pady=(20, 0), padx=(20, 0), anchor="nw")
+
 
         if self.parent.usernameEntry.get() == "admin":
             self.add_book_button = tk.Button(self.bottom_frame, text="Add Book", command=self.add_book)
@@ -129,3 +134,4 @@ class MainScreen(tk.Toplevel):
             self.book_list.append(book_info)
             display_text = f"Book: {book_info.name} - Author: {book_info.author} - ID: {book_info.id}"
             self.list_box.insert(tk.END, display_text)
+

@@ -1,6 +1,7 @@
 import tkinter as tk
-import main_screen as ms
 
+from tkinter import ttk
+import main_screen as ms
 
 class LoginScreen:
     def __init__(self):
@@ -9,7 +10,9 @@ class LoginScreen:
         self.win.eval('tk::PlaceWindow . center')
         self.win.resizable(False, False)
         self.win.title('Login')
+
         self.win.bind("<Configure>", self.on_resize)
+
         self.username = tk.StringVar()
         self.password = tk.StringVar()
         self.usernameLabel = None
@@ -38,11 +41,16 @@ class LoginScreen:
         elif self.usernameEntry.get() == "user" and self.passwordEntry.get() == "67890":
             print("User has logged in.")
             self.navigate_to_main_screen()
+        self.loginButton = tk.Button(self.win, text="Login", command=self.isAdmin)
+        self.loginButton.grid(row=4, column=0, columnspan=2, sticky="ew")
+
             self.win.destroy()
         else:
             print("Invalid username")
 
+
     def on_resize(self, event):
+
         self.win.columnconfigure(0, weight=1)
         self.win.columnconfigure(1, weight=1)
         self.win.rowconfigure(0, weight=1)
@@ -52,10 +60,12 @@ class LoginScreen:
         self.win.rowconfigure(4, weight=1)
         self.win.minsize(self.win.winfo_width(), self.win.winfo_height())
 
+
     def navigate_to_main_screen(self):
         self.win2 = ms.MainScreen(self)
         self.win2.grab_set()
 
 
+=======
 app = LoginScreen()
 app.win.mainloop()
