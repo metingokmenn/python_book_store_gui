@@ -1,5 +1,4 @@
 import tkinter as tk
-
 from tkinter import ttk
 import main_screen as ms
 
@@ -33,6 +32,7 @@ class LoginScreen:
         self.passwordLabel.grid(row=1, column=0, sticky="ew")
         self.passwordEntry = tk.Entry(self.win, textvariable=self.password, show='*')
         self.passwordEntry.grid(row=1, column=1)
+
         self.loginButton = tk.Button(self.win, text="Login")
         self.loginButton.grid(row=4, column=0, columnspan=2, sticky="ew")
 

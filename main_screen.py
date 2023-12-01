@@ -8,12 +8,14 @@ from book import Book
 from full_screen import full_screen
 
 
+
 class MainScreen(tk.Toplevel):
     def __init__(self, parent):
 
         super().__init__()
 
         self.parent = parent
+
 
         self.win = tk.Tk()
         self.win.title('Main Screen')
@@ -103,7 +105,6 @@ class MainScreen(tk.Toplevel):
             self.author_list.append(author_info)
             display_text = f"{author_info.name} - {author_info.books} - ID: {author_info.id}"
             self.list_box_author.insert(tk.END, display_text)
-
 
     def create_widgets(self):
         self.bottom_frame.pack(side=tk.RIGHT, anchor="ne", pady=(20, 0), padx=(0, 20))
