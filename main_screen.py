@@ -1,12 +1,11 @@
-
 from tkinter import simpledialog, messagebox
 import tkinter as tk
 from tkinter import ttk
 
+import author
 from author import Author
 from book import Book
 from full_screen import full_screen
-
 
 
 class MainScreen(tk.Toplevel):
@@ -15,7 +14,6 @@ class MainScreen(tk.Toplevel):
         super().__init__()
 
         self.parent = parent
-
 
         self.win = tk.Tk()
         self.win.title('Main Screen')
@@ -35,7 +33,6 @@ class MainScreen(tk.Toplevel):
         self.selected_item_index_book = None
         self.selected_item_index_author = None
 
-
         if parent.usernameEntry.get() == "user":
             print("user logged in")
         elif parent.usernameEntry.get() == "admin":
@@ -51,12 +48,11 @@ class MainScreen(tk.Toplevel):
         selected_item_index = self.selected_item_index_book[0]
         selected_book = self.book_list[selected_item_index]
 
-
-
         new_book_name = simpledialog.askstring("Edit Book",
                                                f"Enter the new book name for ID {selected_book.id}:", parent=self.win)
         new_author_name = simpledialog.askstring("Edit Book",
-                                                 f"Enter the new author name for ID {selected_book.id}:", parent=self.win)
+                                                 f"Enter the new author name for ID {selected_book.id}:",
+                                                 parent=self.win)
 
         if new_book_name and new_author_name is not None:
             selected_book.name = new_book_name
@@ -69,10 +65,39 @@ class MainScreen(tk.Toplevel):
             # Güncelleme sonrasında seçilen öğeyi güncelle
             self.on_item_select_book(None)
 
+    def edit_author(self):
+        if not self.selected_item_index_author:
+            messagebox.showinfo("Edit Author", "Please select a author to edit.")
+            return
+
+        selected_item_index = self.selected_item_index_author[0]
+        selected_author = self.author_list[selected_item_index]
+
+        new_author_name = simpledialog.askstring("Edit Author",
+                                                 f"Enter the new author name for ID {selected_author.id}:",
+                                                 parent=self.win)
+        new_author_books = []
+
+        if new_author_name is not None:
+            selected_author.name = new_author_name
+            selected_author.books = new_author_books
+
+            updated_text = f"Author: {selected_author.name} - Books: {selected_author.books} - ID: {selected_author.id}"
+            self.list_box_author.delete(selected_item_index)
+            self.list_box_author.insert(selected_item_index, updated_text)
+
+            # Güncelleme sonrasında seçilen öğeyi güncelle
+            self.on_item_select_author(None)
+
     def update_book_ids_after_delete(self, deleted_index):
         # Silinen öğeden sonraki tüm öğelerin ID'lerini güncelle
         for i in range(deleted_index, len(self.parent.book_list)):
             self.parent.book_list[i].id = i + 1
+
+    def update_author_ids_after_delete(self, deleted_index):
+        # Silinen öğeden sonraki tüm öğelerin ID'lerini güncelle
+        for i in range(deleted_index, len(self.author_list)):
+            self.author_list[i].id = i + 1
 
     def delete_book(self):
         if not self.selected_item_index_book:
@@ -85,12 +110,30 @@ class MainScreen(tk.Toplevel):
         self.update_book_ids_after_delete(deleted_index)
         self.selected_item_index_book = None
 
-        if  self.selected_item_index_book:
+        if self.selected_item_index_book:
             messagebox.showinfo("Success", f"Book '{deleted_book.name}' deleted successfully.")
 
         # Güncelleme: Silinen öğeden sonraki tüm öğelerin ID'lerini güncelle
         for i in range(deleted_index, len(self.book_list)):
             self.book_list[i].id = i + 1
+
+    def delete_author(self):
+        if not self.selected_item_index_author:
+            messagebox.showinfo("Error", "Please select a author to delete.")
+            return
+
+        deleted_index = self.selected_item_index_author[0]
+        self.list_box_author.delete(deleted_index)
+        deleted_author = self.author_list.pop(deleted_index)
+        self.update_author_ids_after_delete(deleted_index)
+        self.selected_item_index_author = None
+
+        if self.selected_item_index_author:
+            messagebox.showinfo("Success", f"Book '{deleted_author.name}' deleted successfully.")
+
+        # Güncelleme: Silinen öğeden sonraki tüm öğelerin ID'lerini güncelle
+        for i in range(deleted_index, len(self.author_list)):
+            self.author_list[i].id = i + 1
 
     def list_maker_book(self):
         for i in range(50):
@@ -112,9 +155,7 @@ class MainScreen(tk.Toplevel):
         self.book_name_label.pack(padx=(0, 500), pady=(20, 0), anchor="nw")
         self.author_name_label.pack(padx=(0, 500), pady=(20, 0), anchor="nw")
         self.list_box_book.pack(pady=(20, 0), padx=(20, 0), anchor="nw", side=tk.LEFT)
-        self.list_box_author.pack(pady=(20,0),padx=(40, 0), side=tk.LEFT, anchor="nw")
-
-
+        self.list_box_author.pack(pady=(20, 0), padx=(40, 0), side=tk.LEFT, anchor="nw")
 
         if self.parent.usernameEntry.get() == "admin":
             self.add_book_button = tk.Button(self.bottom_frame, text="Add Book", command=self.add_book)
@@ -125,12 +166,12 @@ class MainScreen(tk.Toplevel):
             self.delete_book_button = tk.Button(self.bottom_frame, text="Delete Book", command=self.delete_book)
             self.delete_book_button.pack(side=tk.LEFT, pady=(20, 0))
 
-            self.add_author_button = tk.Button(self.bottom_frame, text="Add Author", command=self.add_book)
-            self.add_author_button.pack( side=tk.LEFT, padx=(40, 0), pady=(20, 0))
-            self.edit_author_button = tk.Button(self.bottom_frame, text="Edit Author", command=self.edit_book)
+            self.add_author_button = tk.Button(self.bottom_frame, text="Add Author", command=self.add_author)
+            self.add_author_button.pack(side=tk.LEFT, padx=(40, 0), pady=(20, 0))
+            self.edit_author_button = tk.Button(self.bottom_frame, text="Edit Author", command=self.edit_author)
             self.edit_author_button.pack(side=tk.LEFT, pady=(20, 0))
 
-            self.delete_author_button = tk.Button(self.bottom_frame, text="Delete Author", command=self.delete_book)
+            self.delete_author_button = tk.Button(self.bottom_frame, text="Delete Author", command=self.delete_author)
             self.delete_author_button.pack(side=tk.LEFT, pady=(20, 0))
 
         else:
@@ -192,15 +233,14 @@ class MainScreen(tk.Toplevel):
             display_text = f"Book: {book_info.name} - Author: {book_info.author} - ID: {book_info.id}"
             self.list_box_book.insert(tk.END, display_text)
 
-
     def add_author(self):
         author_name = simpledialog.askstring("Add Author", "Enter the author name:", parent=self.win)
         author_books = []
 
         if author_name is not None:
-            max_id = max(book.id for book in self.author_list) if self.author_list else 0
+            max_id = max(author.id for author in self.author_list) if self.author_list else 0
             new_author_id = max_id + 1
-            author_info = Author(new_author_id,author_name,author_books)
+            author_info = Author(new_author_id, author_name, author_books)
             self.author_list.append(author_info)
             display_text = author_info.__str__()
-
+            self.list_box_author.insert(tk.END, display_text)
