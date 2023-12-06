@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 import main_screen as ms
+from tkinter import messagebox as msg
 
 class LoginScreen:
     def __init__(self):
@@ -59,6 +60,7 @@ class LoginScreen:
 
             else:
                 print("Invalid username")
+                msg.showinfo(title='Invalid credentials !', message='Invalid username or password !')
 
 
 
