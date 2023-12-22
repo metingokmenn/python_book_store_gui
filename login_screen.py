@@ -2,6 +2,9 @@ import tkinter as tk
 from tkinter import ttk
 import main_screen as ms
 
+import db
+import sqlite3
+
 class LoginScreen:
     def __init__(self):
         self.win = tk.Tk()
@@ -9,7 +12,17 @@ class LoginScreen:
         self.win.eval('tk::PlaceWindow . center')
         self.win.resizable(False, False)
         self.win.title('Login')
+<<<<<<< Updated upstream
         self.win.bind("<Configure>", self.onResize)
+=======
+
+        self.db = db.DatabaseManager()
+
+        self.win.bind("<Configure>", self.on_resize)
+
+        self.win.bind("<Return>", self.is_admin)
+
+>>>>>>> Stashed changes
         self.username = tk.StringVar()
         self.password = tk.StringVar()
         self.usernameLabel = None
@@ -20,6 +33,8 @@ class LoginScreen:
         self.create_widgets()
 
     def create_widgets(self):
+        self.db.fill_database
+
         self.usernameLabel = tk.Label(self.win, text="User Name")
         self.usernameLabel.grid(row=0, column=0, sticky="ew")
         self.usernameEntry = tk.Entry(self.win, textvariable=self.username, width=20)
@@ -28,6 +43,7 @@ class LoginScreen:
         self.passwordLabel.grid(row=1, column=0, sticky="ew")
         self.passwordEntry = tk.Entry(self.win, textvariable=self.password, show='*')
         self.passwordEntry.grid(row=1, column=1)
+<<<<<<< Updated upstream
         self.loginButton = tk.Button(self.win, text="Login", command=self.isAdmin)
         self.loginButton.grid(row=4, column=0, columnspan=2, sticky="ew")
 
@@ -42,6 +58,56 @@ class LoginScreen:
             self.win.destroy()
         else:
             print("Invalid username")
+=======
+
+        self.loginButton = tk.Button(self.win, text="Login")
+
+        self.loginButton.grid(row=4, column=0, columnspan=2, sticky="ew")
+
+        self.loginButton.bind("<Button-1>", self.is_admin)
+
+
+        self.usernameEntry.focus_set()
+
+
+
+
+
+    def is_admin(self, event):
+            self.create_db()
+            self.fill_db()
+            if self.usernameEntry.get() == "admin" and self.passwordEntry.get() == "12345":
+                self.navigate_to_main_screen()
+                self.win.destroy()
+            elif self.usernameEntry.get() == "user" and self.passwordEntry.get() == "67890":
+                print("User has logged in.")
+                self.navigate_to_main_screen()
+                self.loginButton.grid(row=4, column=0, columnspan=2, sticky="ew")
+
+                self.win.destroy()
+
+            else:
+                print("Invalid username")
+                msg.showinfo(title='Invalid credentials !', message='Invalid username or password !')
+
+    def create_db(self):
+        try:
+            self.db.create_database()
+            print("GELDİ")
+        except sqlite3.Error as err:
+            print("GELMEDİ " + str(err))
+
+    def fill_db(self):
+        try:
+            self.db.fill_database()
+            print("GELDİ")
+        except sqlite3.Error as err:
+            print("GELMEDİ " + str(err))
+
+
+
+    def on_resize(self, event):
+>>>>>>> Stashed changes
 
     def onResize(self, event):
         self.win.columnconfigure(0, weight=1)
