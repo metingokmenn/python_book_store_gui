@@ -1,9 +1,10 @@
-
 import tkinter as tk
 from tkinter import ttk
 
 import customtkinter as ctk
 
+import edit_author
+import edit_book
 from author import Author
 from book import Book
 from full_screen import full_screen
@@ -14,13 +15,18 @@ class MainScreen(tk.Toplevel):
 
         super().__init__()
 
-        self.parent = parent
-
         self.win = ctk.CTk()
+        self.parent = parent
         self.win.title('Main Screen')
         self.win.geometry(full_screen(self.win))
         self.win.resizable(True, True)
         ctk.set_appearance_mode("dark")
+
+        self.book_list = []
+        self.author_list = []
+
+        self.selected_book = None
+        self.selected_author = None
 
         self.bottom_frame = ctk.CTkFrame(self.win)
 
@@ -73,17 +79,23 @@ class MainScreen(tk.Toplevel):
         print(f"Navigate to Author page: {book_id}")
 
     def on_edit_book_click(self):
-        item_id = self.tv_books.selection()[0]
-        values = self.tv_books.item(item_id, 'values')
-        book_id = values[0]
-        print(f"Navigate to edit page with book {book_id}")
+
+        selected_row_id = self.tv_books.selection()[0]
+        selected_item_row = self.tv_books.item(selected_row_id)["values"]
+
+        self.edit_book_page = edit_book.EditBook(parent=self, bid=int(selected_item_row[0])
+                                   , name=selected_item_row[1]
+                                   , author_name=selected_item_row[2])
+        self.edit_book_page.grab_set()
 
     def on_edit_author_click(self):
 
-        item_id = self.tv_authors.selection()[0]
-        values = self.tv_authors.item(item_id, 'values')
-        author_id = values[0]
-        print(f"Navigate to edit page with author {author_id}")
+        selected_row_id = self.tv_authors.selection()[0]
+        selected_item_row = self.tv_authors.item(selected_row_id)["values"]
+
+        self.edit_author_page = edit_author.EditAuthor(parent=self, aid=int(selected_item_row[0])
+                                                 , name=selected_item_row[1])
+        self.edit_author_page.grab_set()
 
     def is_user(self):
         self.add_book_button.configure(state=tk.DISABLED)
@@ -134,13 +146,16 @@ class MainScreen(tk.Toplevel):
 
         self.tv_books.bind("<Double-1>", self.on_book_double_click)
 
+
     def insert_dummy_data(self):
         # Insert sample data for authors
         authors_data = [(1, 'John Doe'), (2, 'Jane Smith'), (3, 'Alice Johnson')]
         for data in authors_data:
             self.tv_authors.insert('', 'end', values=data)
+            self.author_list.append(data)
 
         # Insert sample data for books
         books_data = [(1, 'Book A', 'John Doe'), (2, 'Book B', 'Jane Smith'), (3, 'Book C', 'Alice Johnson')]
         for data in books_data:
             self.tv_books.insert('', 'end', values=data)
+            self.book_list.append(data)
