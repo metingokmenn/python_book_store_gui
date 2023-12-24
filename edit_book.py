@@ -6,7 +6,7 @@ import db
 
 
 class EditBook(tk.Toplevel):
-    def __init__(self, parent, bid, name, author_name):
+    def __init__(self, parent, bid, name, author_name, rowid):
         super().__init__()
 
         self.db = db.DatabaseManager()
@@ -17,17 +17,24 @@ class EditBook(tk.Toplevel):
         self.parent = parent
         self.protocol("WM_DELETE_WINDOW", self.close_window)
 
+        conn = self.db.get_connection()
+        cur = conn.cursor()
+        cur.execute("select aid from authors where  authorname=?", [author_name])
+        aid = cur.fetchall()
+        self.edit_aid = aid[0][0]
+
         self.bid = ctk.StringVar(value=bid)
         self.name = ctk.StringVar(value=name)
-        self.author_name = ctk.StringVar(value=author_name)
+        self.author_id = ctk.StringVar(value=self.edit_aid)
+        self.rowid = rowid
 
         self.id_label = ctk.CTkLabel(self, text='ID: ')
         self.name_label = ctk.CTkLabel(self, text='Book Name: ')
-        self.author_label = ctk.CTkLabel(self, text='Author Name: ')
+        self.author_label = ctk.CTkLabel(self, text='Author ID: ')
 
-        self.edit_name_entry = ctk.CTkEntry(self, textvariable=self.bid)
-        self.edit_id_entry = ctk.CTkEntry(self, textvariable=self.name)
-        self.edit_author_entry = ctk.CTkEntry(self, textvariable=self.author_name)
+        self.edit_name_entry = ctk.CTkEntry(self, textvariable=self.name)
+        self.edit_id_entry = ctk.CTkEntry(self, textvariable=self.bid, state='readonly')
+        self.edit_author_entry = ctk.CTkEntry(self, textvariable=self.author_id)
 
         self.submit_button = ctk.CTkButton(self, text='Submit Changes', command=self.submit_edit)
 
@@ -56,7 +63,14 @@ class EditBook(tk.Toplevel):
         self.submit_button.grid(row=3, column=0, columnspan=2, pady=(20, 0))
 
     def submit_edit(self):
-        pass
+        conn = self.db.get_connection()
+        cur = conn.cursor()
+        cur.execute("select authorname from authors where aid = ?", [self.author_id.get()])
+        edited_author_name_tuple = cur.fetchall()
+        edited_author_name = edited_author_name_tuple[0][0]
+        self.db.edit_book(self.bid.get(), self.name.get(), self.author_id.get())
+        self.parent.tv_books.item(self.rowid, values=(self.bid.get(), self.name.get(), edited_author_name))
+        self.close_window()
 
     def close_window(self):
         self.destroy()

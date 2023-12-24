@@ -33,7 +33,7 @@ class DatabaseManager:
         #
         #""")
 
-        self.fill_database()
+
         self.conn.close()
 
     def fill_database(self):
