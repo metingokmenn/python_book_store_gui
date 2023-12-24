@@ -3,6 +3,7 @@ from tkinter import ttk
 
 import customtkinter as ctk
 
+import db
 import edit_author
 import edit_book
 from author import Author
@@ -46,6 +47,10 @@ class MainScreen(tk.Toplevel):
         self.tv_books = ttk.Treeview(self.win, height=10, show="headings")
         self.tv_authors = ttk.Treeview(self.win, height=10, show="headings")
 
+        self.db = db.DatabaseManager()
+
+        self.db.create_database()
+
         self.insert_dummy_data()
 
         if parent.usernameEntry.get() == "user":
@@ -84,8 +89,9 @@ class MainScreen(tk.Toplevel):
         selected_item_row = self.tv_books.item(selected_row_id)["values"]
 
         self.edit_book_page = edit_book.EditBook(parent=self, bid=int(selected_item_row[0])
-                                   , name=selected_item_row[1]
-                                   , author_name=selected_item_row[2])
+                                                 , name=selected_item_row[1]
+                                                 , author_name=selected_item_row[2],
+                                                 )
         self.edit_book_page.grab_set()
 
     def on_edit_author_click(self):
@@ -94,7 +100,7 @@ class MainScreen(tk.Toplevel):
         selected_item_row = self.tv_authors.item(selected_row_id)["values"]
 
         self.edit_author_page = edit_author.EditAuthor(parent=self, aid=int(selected_item_row[0])
-                                                 , name=selected_item_row[1])
+                                                       , name=selected_item_row[1], rowid=selected_row_id)
         self.edit_author_page.grab_set()
 
     def is_user(self):
@@ -146,16 +152,17 @@ class MainScreen(tk.Toplevel):
 
         self.tv_books.bind("<Double-1>", self.on_book_double_click)
 
-
     def insert_dummy_data(self):
         # Insert sample data for authors
-        authors_data = [(1, 'John Doe'), (2, 'Jane Smith'), (3, 'Alice Johnson')]
+        # authors_data = [(1, 'John Doe'), (2, 'Jane Smith'), (3, 'Alice Johnson')]
+        authors_data = self.db.list_authors()
         for data in authors_data:
             self.tv_authors.insert('', 'end', values=data)
             self.author_list.append(data)
 
         # Insert sample data for books
-        books_data = [(1, 'Book A', 'John Doe'), (2, 'Book B', 'Jane Smith'), (3, 'Book C', 'Alice Johnson')]
+        # books_data = [(1, 'Book A', 'John Doe'), (2, 'Book B', 'Jane Smith'), (3, 'Book C', 'Alice Johnson')]
+        books_data = self.db.list_books()
         for data in books_data:
             self.tv_books.insert('', 'end', values=data)
             self.book_list.append(data)

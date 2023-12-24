@@ -13,21 +13,27 @@ class DatabaseManager:
         self.conn = self.get_connection()
         self.cur = self.conn.cursor()
         self.cur.execute("""
-        create table books (
-            bid   integer primary key autoincrement,
+        create table if not exists books (
+            bid integer primary key autoincrement,
             bookname text,
-            authorid integer,
-            FOREIGN KEY (authorid) references authors(aid) 
+            aid integer,
+            FOREIGN KEY (aid) references authors(aid) 
         );
         """)
         self.cur.execute("""
-        create table authors(
+        create table if not exists authors(
             aid integer primary key autoincrement,
             authorname text
         );  
         """)
+
+
+        #self.cur.execute("""
+        #select bid,bookname,authorname from (select bid,bookname,b.aid,authorname from books b, authors a where a.aid = b.aid)
+        #
+        #""")
+
         self.fill_database()
-        self.conn.commit()
         self.conn.close()
 
     def fill_database(self):
@@ -36,8 +42,9 @@ class DatabaseManager:
         data = [('Kitap adi', 'Yazar'),
                 ('Yeni Kitap Adi', 'Yeni Yazar')]
 
-        for item in data:
-            self.cur.execute("insert into Book(bookname, authorname) values(?, ?)", item)
+        self.cur.execute("insert into authors(authorname) values('Refik Türker')")
+        self.cur.execute("insert into books(bookname,aid) values('Küçük Prens', 1)")
+
 
         self.conn.commit()
         self.conn.close()
@@ -45,36 +52,66 @@ class DatabaseManager:
     def clear_database(self):
         self.conn = self.get_connection()
         self.cur = self.conn.cursor()
-        self.cur.execute("delete from Book")
+        self.cur.execute("delete from books")
+        self.cur.execute("delete from authors")
         self.conn.commit()
         self.conn.close()
 
-    def add_book(self, bookname, authorname):
+    def add_book(self, bookname, aid):
         self.conn = self.get_connection()
         self.cur = self.conn.cursor()
-        self.cur.execute("insert into Book(fname, lname) values(:bookname, :authorname)",
+        self.cur.execute("insert into books(bookname, aid) values(:bookname, :aid)",
                     {"bookname": bookname,
-                     "authorname": authorname})
+                     "aid": aid})
+        self.conn.commit()
+        self.conn.close()
+
+    def add_author(self, authorname):
+        self.conn = self.get_connection()
+        self.cur = self.conn.cursor()
+        self.cur.execute("insert into authors(authorname) values(:authorname)",
+                    {"authorname": authorname})
         self.conn.commit()
         self.conn.close()
 
     def list_books(self):
         self.conn = self.get_connection()
         self.cur = self.conn.cursor()
-        self.cur.execute("select * from Book")
+        self.cur.execute("select bid,bookname,authorname from (select bid,bookname,authorname from books b, authors a where b.aid = a.aid)")
         books = self.cur.fetchall()
         self.conn.close()
         return books
 
+    def list_authors(self):
+        self.conn = self.get_connection()
+        self.cur = self.conn.cursor()
+        self.cur.execute("select * from authors")
+        authors = self.cur.fetchall()
+        self.conn.close()
+        return authors
+
     def delete_book(self, bid):
         self.conn = self.get_connection()
         self.cur = self.conn.cursor()
-        self.cur.execute("delete from Book where bid=?", [bid])
+        self.cur.execute("delete from books where bid=?", [bid])
         self.conn.commit()
 
-    def edit_book(self, bid, bookname, authorname):
+    def delete_author(self, aid):
         self.conn = self.get_connection()
         self.cur = self.conn.cursor()
-        self.cur.execute("update Book set bookname=?, authorname=? where bid=?",
-                         [bookname, authorname, bid])
+        self.cur.execute("delete from authors where aid=?", [aid])
+        self.conn.commit()
+
+    def edit_book(self, bid, bookname, aid):
+        self.conn = self.get_connection()
+        self.cur = self.conn.cursor()
+        self.cur.execute("update books set bookname=?, aid=? where bid=?",
+                         [bookname, aid, bid])
+        self.conn.commit()
+
+    def edit_author(self, aid, authorname):
+        self.conn = self.get_connection()
+        self.cur = self.conn.cursor()
+        self.cur.execute("update authors set authorname=? where aid=?",
+                         [authorname, aid])
         self.conn.commit()
