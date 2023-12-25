@@ -3,6 +3,7 @@ from tkinter import ttk
 
 import customtkinter as ctk
 
+import add_author
 import add_book
 import db
 import edit_author
@@ -36,7 +37,7 @@ class MainScreen(tk.Toplevel):
         self.edit_book_button = ctk.CTkButton(self.bottom_frame, text="Edit Book", command=self.on_edit_book_click)
         self.delete_book_button = ctk.CTkButton(self.bottom_frame, text="Delete Book")
 
-        self.add_author_button = ctk.CTkButton(self.bottom_frame, text="Add Author")
+        self.add_author_button = ctk.CTkButton(self.bottom_frame, text="Add Author", command=self.on_add_author_click)
         self.edit_author_button = ctk.CTkButton(self.bottom_frame, text="Edit Author",
                                                 command=self.on_edit_author_click)
         self.delete_author_button = ctk.CTkButton(self.bottom_frame, text="Delete Author")
@@ -51,7 +52,7 @@ class MainScreen(tk.Toplevel):
         self.db = db.DatabaseManager()
 
         self.db.create_database()
-
+        #self.db.fill_database()
         self.insert_dummy_data()
 
         if parent.usernameEntry.get() == "user":
@@ -109,6 +110,11 @@ class MainScreen(tk.Toplevel):
         self.add_book_page = add_book.AddBook(parent=self)
 
         self.add_book_page.grab_set()
+
+    def on_add_author_click(self):
+        self.add_author_page = add_author.AddAuthor(parent=self)
+
+        self.add_author_page.grab_set()
 
     def is_user(self):
         self.add_book_button.configure(state=tk.DISABLED)

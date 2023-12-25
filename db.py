@@ -115,3 +115,22 @@ class DatabaseManager:
         self.cur.execute("update authors set authorname=? where aid=?",
                          [authorname, aid])
         self.conn.commit()
+
+    def get_max_book_id(self):
+        conn = self.get_connection()
+        cur = conn.cursor()
+
+        cur.execute("SELECT MAX(bid) FROM books")
+        max_book_id = cur.fetchone()[0]
+
+        return max_book_id        
+
+    def get_max_author_id(self):
+        conn = self.get_connection()
+        cur = conn.cursor()
+
+        cur.execute("SELECT MAX(aid) FROM authors")
+        max_book_id = cur.fetchone()[0]
+
+        return max_book_id        
+
