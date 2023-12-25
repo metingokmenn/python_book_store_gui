@@ -51,7 +51,8 @@ class EditAuthor(tk.Toplevel):
 
     def submit_edit(self):
         self.db.edit_author(self.aid.get(), self.name.get())
-        self.parent.tv_authors.item(self.rowid, values=(self.aid.get(),self.name.get()))
+        self.parent.tv_authors.item(self.rowid, values=(self.aid.get(), self.name.get()))
+
         self.close_window()
 
     def close_window(self):

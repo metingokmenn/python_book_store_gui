@@ -151,6 +151,7 @@ class MainScreen(tk.Toplevel):
 
         self.tv_authors.bind("<Double-1>", self.on_author_double_click)
 
+
     def create_books_treeview(self):
         self.tv_books["columns"] = ("id", "name", "author_name")
         self.tv_books.pack(fill="both", expand=True)

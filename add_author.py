@@ -47,6 +47,7 @@ class AddAuthor(tk.Toplevel):
         self.add_button.grid(row=1, column=0, columnspan=2, pady=(20, 0))
 
     def submit_add(self):
+        global conn
         try:
             conn = self.db.get_connection()
             cur = conn.cursor()
