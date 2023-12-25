@@ -6,7 +6,7 @@ import db
 
 
 class EditAuthor(tk.Toplevel):
-    def __init__(self, parent, aid, name,rowid):
+    def __init__(self, parent, aid, name, rowid, callback):
         super().__init__()
 
         self.db = db.DatabaseManager()
@@ -20,6 +20,7 @@ class EditAuthor(tk.Toplevel):
         self.aid = ctk.StringVar(value=aid)
         self.name = ctk.StringVar(value=name)
         self.rowid = rowid
+        self.callback = callback
 
         self.id_label = ctk.CTkLabel(self,text='ID: ')
         self.name_label = ctk.CTkLabel(self,text='Name: ')
@@ -52,7 +53,7 @@ class EditAuthor(tk.Toplevel):
     def submit_edit(self):
         self.db.edit_author(self.aid.get(), self.name.get())
         self.parent.tv_authors.item(self.rowid, values=(self.aid.get(), self.name.get()))
-
+        self.callback()
         self.close_window()
 
     def close_window(self):

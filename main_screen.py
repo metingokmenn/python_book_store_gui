@@ -35,12 +35,12 @@ class MainScreen(tk.Toplevel):
 
         self.add_book_button = ctk.CTkButton(self.bottom_frame, text="Add Book", command=self.on_add_book_click)
         self.edit_book_button = ctk.CTkButton(self.bottom_frame, text="Edit Book", command=self.on_edit_book_click)
-        self.delete_book_button = ctk.CTkButton(self.bottom_frame, text="Delete Book")
+        self.delete_book_button = ctk.CTkButton(self.bottom_frame, text="Delete Book", command=self.on_delete_book_click)
 
         self.add_author_button = ctk.CTkButton(self.bottom_frame, text="Add Author", command=self.on_add_author_click)
         self.edit_author_button = ctk.CTkButton(self.bottom_frame, text="Edit Author",
                                                 command=self.on_edit_author_click)
-        self.delete_author_button = ctk.CTkButton(self.bottom_frame, text="Delete Author")
+        self.delete_author_button = ctk.CTkButton(self.bottom_frame, text="Delete Author", command=self.on_delete_author_click)
 
         self.book_id_label = ctk.CTkLabel(self.bottom_frame, text=f"Book id: ")
         self.book_name_label = ctk.CTkLabel(self.bottom_frame, text=f"Book name: ")
@@ -102,7 +102,7 @@ class MainScreen(tk.Toplevel):
         selected_item_row = self.tv_authors.item(selected_row_id)["values"]
 
         self.edit_author_page = edit_author.EditAuthor(parent=self, aid=int(selected_item_row[0])
-                                                       , name=selected_item_row[1], rowid=selected_row_id)
+                                                       , name=selected_item_row[1], rowid=selected_row_id, callback=self.update_books_treeview)
         self.edit_author_page.grab_set()
 
     def on_add_book_click(self):
@@ -115,6 +115,26 @@ class MainScreen(tk.Toplevel):
         self.add_author_page = add_author.AddAuthor(parent=self)
 
         self.add_author_page.grab_set()
+
+    def on_delete_book_click(self):
+        selected_row_id = self.tv_books.selection()[0]
+        selected_item_row = self.tv_books.item(selected_row_id)["values"]
+        selected_book_id = selected_item_row[0]
+        selected_item = self.tv_books.selection()
+        if selected_item:
+            self.db.delete_book(int(selected_book_id))
+            self.tv_books.delete(selected_item)
+
+    def on_delete_author_click(self):
+        selected_row_id = self.tv_authors.selection()[0]
+        selected_item_row = self.tv_authors.item(selected_row_id)["values"]
+        selected_author_id = selected_item_row[0]
+        selected_item = self.tv_authors.selection()
+        if selected_item:
+            self.tv_authors.delete(selected_item)
+            self.db.delete_author(int(selected_author_id))
+
+
 
     def is_user(self):
         self.add_book_button.configure(state=tk.DISABLED)
@@ -151,7 +171,6 @@ class MainScreen(tk.Toplevel):
 
         self.tv_authors.bind("<Double-1>", self.on_author_double_click)
 
-
     def create_books_treeview(self):
         self.tv_books["columns"] = ("id", "name", "author_name")
         self.tv_books.pack(fill="both", expand=True)
@@ -165,6 +184,17 @@ class MainScreen(tk.Toplevel):
         self.tv_books.column("author_name", anchor="w", width=135)
 
         self.tv_books.bind("<Double-1>", self.on_book_double_click)
+
+    def update_books_treeview(self):
+        # Clear the current items in the treeview
+        for item in self.tv_books.get_children():
+            self.tv_books.delete(item)
+
+        # Reload data and insert updated items
+        books_data = self.db.list_books()
+        for data in books_data:
+            self.tv_books.insert('', 'end', values=data)
+            self.book_list.append(data)
 
     def insert_dummy_data(self):
         # Insert sample data for authors
