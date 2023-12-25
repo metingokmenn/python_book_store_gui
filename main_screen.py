@@ -1,8 +1,12 @@
-from tkinter import simpledialog, messagebox
 import tkinter as tk
 from tkinter import ttk
 
-import author
+import customtkinter as ctk
+
+import add_book
+import db
+import edit_author
+import edit_book
 from author import Author
 from book import Book
 from full_screen import full_screen
@@ -13,234 +17,159 @@ class MainScreen(tk.Toplevel):
 
         super().__init__()
 
+        self.win = ctk.CTk()
         self.parent = parent
-
-        self.win = tk.Tk()
         self.win.title('Main Screen')
         self.win.geometry(full_screen(self.win))
         self.win.resizable(True, True)
+        ctk.set_appearance_mode("dark")
 
-        self.book_list = []  # Her bir kitap öğesini içeren liste
+        self.book_list = []
         self.author_list = []
-        self.list_box_book = tk.Listbox(self.win, height=50, width=50, selectmode='SINGLE')
-        self.list_box_author = tk.Listbox(self.win, height=50, width=50, selectmode='SINGLE')
-        self.bottom_frame = tk.Frame(self.win)
-        self.book_id_label = ttk.Label(self.bottom_frame, text=f"Book id: ", font=("Times", "16", "bold"))
-        self.book_name_label = ttk.Label(self.bottom_frame, text=f"Book name: ", font=("Times", "16", "bold"))
-        self.author_name_label = ttk.Label(self.bottom_frame, text=f"Author name: ", font=("Times", "16", "bold"))
-        self.list_box_book.bind("<ButtonRelease-1>", self.on_item_select_book)
-        self.list_box_author.bind("<ButtonRelease-1>", self.on_item_select_author)
-        self.selected_item_index_book = None
-        self.selected_item_index_author = None
+
+        self.selected_book = None
+        self.selected_author = None
+
+        self.bottom_frame = ctk.CTkFrame(self.win)
+
+        self.add_book_button = ctk.CTkButton(self.bottom_frame, text="Add Book", command=self.on_add_book_click)
+        self.edit_book_button = ctk.CTkButton(self.bottom_frame, text="Edit Book", command=self.on_edit_book_click)
+        self.delete_book_button = ctk.CTkButton(self.bottom_frame, text="Delete Book")
+
+        self.add_author_button = ctk.CTkButton(self.bottom_frame, text="Add Author")
+        self.edit_author_button = ctk.CTkButton(self.bottom_frame, text="Edit Author",
+                                                command=self.on_edit_author_click)
+        self.delete_author_button = ctk.CTkButton(self.bottom_frame, text="Delete Author")
+
+        self.book_id_label = ctk.CTkLabel(self.bottom_frame, text=f"Book id: ")
+        self.book_name_label = ctk.CTkLabel(self.bottom_frame, text=f"Book name: ")
+        self.author_name_label = ctk.CTkLabel(self.bottom_frame, text=f"Author name: ")
+
+        self.tv_books = ttk.Treeview(self.win, height=10, show="headings")
+        self.tv_authors = ttk.Treeview(self.win, height=10, show="headings")
+
+        self.db = db.DatabaseManager()
+
+        self.db.create_database()
+
+        self.insert_dummy_data()
 
         if parent.usernameEntry.get() == "user":
             print("user logged in")
+            self.is_user()
+
         elif parent.usernameEntry.get() == "admin":
             print("admin logged in")
 
         self.create_widgets()
 
-    def edit_book(self):
-        if not self.selected_item_index_book:
-            messagebox.showinfo("Edit Book", "Please select a book to edit.")
-            return
-
-        selected_item_index = self.selected_item_index_book[0]
-        selected_book = self.book_list[selected_item_index]
-
-        new_book_name = simpledialog.askstring("Edit Book",
-                                               f"Enter the new book name for ID {selected_book.id}:", parent=self.win)
-        new_author_name = simpledialog.askstring("Edit Book",
-                                                 f"Enter the new author name for ID {selected_book.id}:",
-                                                 parent=self.win)
-
-        if new_book_name and new_author_name is not None:
-            selected_book.name = new_book_name
-            selected_book.author = new_author_name
-
-            updated_text = f"Book: {selected_book.name} - Author: {selected_book.author} - ID: {selected_book.id}"
-            self.list_box_book.delete(selected_item_index)
-            self.list_box_book.insert(selected_item_index, updated_text)
-
-            # Güncelleme sonrasında seçilen öğeyi güncelle
-            self.on_item_select_book(None)
-
-    def edit_author(self):
-        if not self.selected_item_index_author:
-            messagebox.showinfo("Edit Author", "Please select a author to edit.")
-            return
-
-        selected_item_index = self.selected_item_index_author[0]
-        selected_author = self.author_list[selected_item_index]
-
-        new_author_name = simpledialog.askstring("Edit Author",
-                                                 f"Enter the new author name for ID {selected_author.id}:",
-                                                 parent=self.win)
-        new_author_books = []
-
-        if new_author_name is not None:
-            selected_author.name = new_author_name
-            selected_author.books = new_author_books
-
-            updated_text = f"Author: {selected_author.name} - Books: {selected_author.books} - ID: {selected_author.id}"
-            self.list_box_author.delete(selected_item_index)
-            self.list_box_author.insert(selected_item_index, updated_text)
-
-            # Güncelleme sonrasında seçilen öğeyi güncelle
-            self.on_item_select_author(None)
-
-    def update_book_ids_after_delete(self, deleted_index):
-        # Silinen öğeden sonraki tüm öğelerin ID'lerini güncelle
-        for i in range(deleted_index, len(self.parent.book_list)):
-            self.parent.book_list[i].id = i + 1
-
-    def update_author_ids_after_delete(self, deleted_index):
-        # Silinen öğeden sonraki tüm öğelerin ID'lerini güncelle
-        for i in range(deleted_index, len(self.author_list)):
-            self.author_list[i].id = i + 1
-
-    def delete_book(self):
-        if not self.selected_item_index_book:
-            messagebox.showinfo("Error", "Please select a book to delete.")
-            return
-
-        deleted_index = self.selected_item_index_book[0]
-        self.list_box_book.delete(deleted_index)
-        deleted_book = self.book_list.pop(deleted_index)
-        self.update_book_ids_after_delete(deleted_index)
-        self.selected_item_index_book = None
-
-        if self.selected_item_index_book:
-            messagebox.showinfo("Success", f"Book '{deleted_book.name}' deleted successfully.")
-
-        # Güncelleme: Silinen öğeden sonraki tüm öğelerin ID'lerini güncelle
-        for i in range(deleted_index, len(self.book_list)):
-            self.book_list[i].id = i + 1
-
-    def delete_author(self):
-        if not self.selected_item_index_author:
-            messagebox.showinfo("Error", "Please select a author to delete.")
-            return
-
-        deleted_index = self.selected_item_index_author[0]
-        self.list_box_author.delete(deleted_index)
-        deleted_author = self.author_list.pop(deleted_index)
-        self.update_author_ids_after_delete(deleted_index)
-        self.selected_item_index_author = None
-
-        if self.selected_item_index_author:
-            messagebox.showinfo("Success", f"Book '{deleted_author.name}' deleted successfully.")
-
-        # Güncelleme: Silinen öğeden sonraki tüm öğelerin ID'lerini güncelle
-        for i in range(deleted_index, len(self.author_list)):
-            self.author_list[i].id = i + 1
-
-    def list_maker_book(self):
-        for i in range(50):
-            book_info = Book(i + 1, f"Book Label", f"Author")
-            self.book_list.append(book_info)
-            display_text = f"{book_info.name} - {book_info.author} - ID: {book_info.id}"
-            self.list_box_book.insert(tk.END, display_text)
-
-    def list_maker_author(self):
-        for i in range(50):
-            author_info = Author(i + 1, f"Author Name", f"Author Books")
-            self.author_list.append(author_info)
-            display_text = f"{author_info.name} - {author_info.books} - ID: {author_info.id}"
-            self.list_box_author.insert(tk.END, display_text)
-
     def create_widgets(self):
         self.bottom_frame.pack(side=tk.RIGHT, anchor="ne", pady=(20, 0), padx=(0, 20))
+
+        self.create_labels()
+        self.create_buttons()
+
+        self.create_books_treeview()
+        self.create_authors_treeview()
+
+    def on_author_double_click(self, event):
+        item_id = self.tv_authors.selection()[0]
+        values = self.tv_authors.item(item_id, 'values')
+        author_id = values[0]
+        print(f"Navigate to Book page: {author_id}")
+
+    def on_book_double_click(self, event):
+        item_id = self.tv_books.selection()[0]
+        values = self.tv_books.item(item_id, 'values')
+        book_id = values[0]
+        print(f"Navigate to Author page: {book_id}")
+
+    def on_edit_book_click(self):
+
+        selected_row_id = self.tv_books.selection()[0]
+        selected_item_row = self.tv_books.item(selected_row_id)["values"]
+
+        self.edit_book_page = edit_book.EditBook(parent=self, bid=int(selected_item_row[0])
+                                                 , name=selected_item_row[1]
+                                                 , author_name=selected_item_row[2], rowid=selected_row_id
+                                                 )
+        self.edit_book_page.grab_set()
+
+    def on_edit_author_click(self):
+
+        selected_row_id = self.tv_authors.selection()[0]
+        selected_item_row = self.tv_authors.item(selected_row_id)["values"]
+
+        self.edit_author_page = edit_author.EditAuthor(parent=self, aid=int(selected_item_row[0])
+                                                       , name=selected_item_row[1], rowid=selected_row_id)
+        self.edit_author_page.grab_set()
+
+    def on_add_book_click(self):
+
+        self.add_book_page = add_book.AddBook(parent=self)
+
+        self.add_book_page.grab_set()
+
+    def is_user(self):
+        self.add_book_button.configure(state=tk.DISABLED)
+        self.edit_book_button.configure(state=tk.DISABLED)
+        self.delete_book_button.configure(state=tk.DISABLED)
+
+        self.add_author_button.configure(state=tk.DISABLED)
+        self.edit_author_button.configure(state=tk.DISABLED)
+        self.delete_author_button.configure(state=tk.DISABLED)
+
+    def create_buttons(self):
+        self.add_book_button.pack(side=tk.LEFT, pady=(20, 0))
+        self.edit_book_button.pack(side=tk.LEFT, pady=(20, 0))
+        self.delete_book_button.pack(side=tk.LEFT, pady=(20, 0))
+
+        self.add_author_button.pack(side=tk.LEFT, padx=(40, 0), pady=(20, 0))
+        self.edit_author_button.pack(side=tk.LEFT, pady=(20, 0))
+        self.delete_author_button.pack(side=tk.LEFT, pady=(20, 0))
+
+    def create_labels(self):
         self.book_id_label.pack(padx=(0, 500), pady=(20, 0), anchor="nw")
         self.book_name_label.pack(padx=(0, 500), pady=(20, 0), anchor="nw")
         self.author_name_label.pack(padx=(0, 500), pady=(20, 0), anchor="nw")
-        self.list_box_book.pack(pady=(20, 0), padx=(20, 0), anchor="nw", side=tk.LEFT)
-        self.list_box_author.pack(pady=(20, 0), padx=(40, 0), side=tk.LEFT, anchor="nw")
 
-        if self.parent.usernameEntry.get() == "admin":
-            self.add_book_button = tk.Button(self.bottom_frame, text="Add Book", command=self.add_book)
-            self.add_book_button.pack(side=tk.LEFT, pady=(20, 0))
-            self.edit_book_button = tk.Button(self.bottom_frame, text="Edit Book", command=self.edit_book)
-            self.edit_book_button.pack(side=tk.LEFT, pady=(20, 0))
+    def create_authors_treeview(self):
+        self.tv_authors["columns"] = ("id", "name")
+        self.tv_authors.pack(fill="both", expand=True)
 
-            self.delete_book_button = tk.Button(self.bottom_frame, text="Delete Book", command=self.delete_book)
-            self.delete_book_button.pack(side=tk.LEFT, pady=(20, 0))
+        self.tv_authors.heading("id", text="ID", anchor="center")
+        self.tv_authors.heading("name", text="Author Name", anchor="center")
 
-            self.add_author_button = tk.Button(self.bottom_frame, text="Add Author", command=self.add_author)
-            self.add_author_button.pack(side=tk.LEFT, padx=(40, 0), pady=(20, 0))
-            self.edit_author_button = tk.Button(self.bottom_frame, text="Edit Author", command=self.edit_author)
-            self.edit_author_button.pack(side=tk.LEFT, pady=(20, 0))
+        self.tv_authors.column("id", anchor="center", width=45)
+        self.tv_authors.column("name", anchor="w", width=135)
 
-            self.delete_author_button = tk.Button(self.bottom_frame, text="Delete Author", command=self.delete_author)
-            self.delete_author_button.pack(side=tk.LEFT, pady=(20, 0))
+        self.tv_authors.bind("<Double-1>", self.on_author_double_click)
 
-        else:
-            self.add_book_button = tk.Button(self.bottom_frame, text="Add Book", state=tk.DISABLED)
-            self.add_book_button.pack(side=tk.TOP)
-            self.edit_book_button = tk.Button(self.bottom_frame, text="Edit Book", state=tk.DISABLED)
-            self.edit_book_button.pack(side=tk.TOP)
-            self.delete_book_button = tk.Button(self.bottom_frame, text="Delete Book", state=tk.DISABLED)
-            self.delete_book_button.pack(side=tk.TOP)
+    def create_books_treeview(self):
+        self.tv_books["columns"] = ("id", "name", "author_name")
+        self.tv_books.pack(fill="both", expand=True)
 
-        self.list_maker_book()
-        self.list_maker_author()
+        self.tv_books.heading("id", text="ID", anchor="center")
+        self.tv_books.heading("name", text="Book Name", anchor="center")
+        self.tv_books.heading("author_name", text="Author Name", anchor="center")
 
-    def on_item_select_book(self, event):
-        self.selected_item_index_book = self.list_box_book.curselection()
+        self.tv_books.column("id", anchor="center", width=45)
+        self.tv_books.column("name", anchor="w", width=135)
+        self.tv_books.column("author_name", anchor="w", width=135)
 
-        if self.selected_item_index_book:
-            selected_item_info = self.book_list[self.selected_item_index_book[0]]
+        self.tv_books.bind("<Double-1>", self.on_book_double_click)
 
-            self.book_name_label.configure(text=f"Book name: {selected_item_info.name}")
-            self.book_id_label.configure(text=f"Book ID: {selected_item_info.id}")
-            self.author_name_label.configure(text=f"Author name: {selected_item_info.author}")
+    def insert_dummy_data(self):
+        # Insert sample data for authors
+        # authors_data = [(1, 'John Doe'), (2, 'Jane Smith'), (3, 'Alice Johnson')]
+        authors_data = self.db.list_authors()
+        for data in authors_data:
+            self.tv_authors.insert('', 'end', values=data)
+            self.author_list.append(data)
 
-            self.edit_book_button.configure(state=tk.ACTIVE)
-            self.add_book_button.configure(state=tk.ACTIVE)
-            self.delete_book_button.configure(state=tk.ACTIVE)
-
-            self.edit_author_button.configure(state=tk.DISABLED)
-            self.add_author_button.configure(state=tk.DISABLED)
-            self.delete_author_button.configure(state=tk.DISABLED)
-
-    def on_item_select_author(self, event):
-        self.selected_item_index_author = self.list_box_author.curselection()
-
-        if self.selected_item_index_author:
-            selected_item_info = self.author_list[self.selected_item_index_author[0]]
-
-            self.book_name_label.configure(text=f"Author name: {selected_item_info.name}")
-            self.book_id_label.configure(text=f"Author ID: {selected_item_info.id}")
-            self.author_name_label.configure(text=f"Author books: {selected_item_info.books}")
-
-            self.edit_book_button.configure(state=tk.DISABLED)
-            self.add_book_button.configure(state=tk.DISABLED)
-            self.delete_book_button.configure(state=tk.DISABLED)
-
-            self.edit_author_button.configure(state=tk.ACTIVE)
-            self.add_author_button.configure(state=tk.ACTIVE)
-            self.delete_author_button.configure(state=tk.ACTIVE)
-
-    def add_book(self):
-        book_name = simpledialog.askstring("Add Book", "Enter the book name:", parent=self.win)
-        author_name = simpledialog.askstring("Add Book", "Enter the author name:", parent=self.win)
-
-        if book_name and author_name is not None:
-            max_id = max(book.id for book in self.book_list) if self.book_list else 0
-            new_book_id = max_id + 1
-            book_info = Book(new_book_id, book_name, author_name)
-            self.book_list.append(book_info)
-            display_text = f"Book: {book_info.name} - Author: {book_info.author} - ID: {book_info.id}"
-            self.list_box_book.insert(tk.END, display_text)
-
-    def add_author(self):
-        author_name = simpledialog.askstring("Add Author", "Enter the author name:", parent=self.win)
-        author_books = []
-
-        if author_name is not None:
-            max_id = max(author.id for author in self.author_list) if self.author_list else 0
-            new_author_id = max_id + 1
-            author_info = Author(new_author_id, author_name, author_books)
-            self.author_list.append(author_info)
-            display_text = author_info.__str__()
-            self.list_box_author.insert(tk.END, display_text)
+        # Insert sample data for books
+        # books_data = [(1, 'Book A', 'John Doe'), (2, 'Book B', 'Jane Smith'), (3, 'Book C', 'Alice Johnson')]
+        books_data = self.db.list_books()
+        for data in books_data:
+            self.tv_books.insert('', 'end', values=data)
+            self.book_list.append(data)
