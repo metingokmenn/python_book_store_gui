@@ -19,7 +19,7 @@ class EditBook:
 
         conn = self.db.get_connection()
         cur = conn.cursor()
-        cur.execute("select aid from authors where  authorname=?", [author_name])
+        cur.execute("select aid from authors where authorname=?", [author_name])
         aid = cur.fetchall()
         self.edit_aid = aid[0][0]
 
@@ -63,11 +63,7 @@ class EditBook:
         self.submit_button.grid(row=3, column=0, columnspan=2, pady=(20, 0))
 
     def submit_edit(self):
-        conn = self.db.get_connection()
-        cur = conn.cursor()
-        cur.execute("select authorname from authors where aid = ?", [self.author_id.get()])
-        edited_author_name_tuple = cur.fetchall()
-        edited_author_name = edited_author_name_tuple[0][0]
+        edited_author_name = self.db.get_authorname_by_aid(self.author_id.get())
         self.db.edit_book(self.bid.get(), self.name.get(), self.author_id.get())
         self.parent.tv_books.item(self.rowid, values=(self.bid.get(), self.name.get(), edited_author_name))
         self.close_window()

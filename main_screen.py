@@ -8,8 +8,9 @@ import add_book
 import db
 import edit_author
 import edit_book
-from author import Author
-from book import Book
+import search_page
+from author_detail import AuthorDetail
+from book_detail import BookDetail
 from full_screen import full_screen
 
 
@@ -18,6 +19,11 @@ class MainScreen(tk.Toplevel):
 
         super().__init__()
 
+        self.search_page = None
+        self.edit_author_page = None
+        self.add_author_page = None
+        self.add_book_page = None
+        self.edit_book_page = None
         self.win = ctk.CTk()
         self.parent = parent
         self.win.title('Main Screen')
@@ -32,16 +38,22 @@ class MainScreen(tk.Toplevel):
         self.selected_book = None
         self.selected_author = None
 
-        self.bottom_frame = ctk.CTkFrame(self.win)
+        self.bottom_frame = ctk.CTkFrame(self.win, width=int(self.win.winfo_screenwidth() / 2),
+                                         height=int(self.win.winfo_screenheight()))
 
         self.add_book_button = ctk.CTkButton(self.bottom_frame, text="Add Book", command=self.on_add_book_click)
         self.edit_book_button = ctk.CTkButton(self.bottom_frame, text="Edit Book", command=self.on_edit_book_click)
-        self.delete_book_button = ctk.CTkButton(self.bottom_frame, text="Delete Book", command=self.on_delete_book_click)
+        self.delete_book_button = ctk.CTkButton(self.bottom_frame, text="Delete Book",
+                                                command=self.on_delete_book_click)
+
+        self.search_button = ctk.CTkButton(self.bottom_frame, text="Search", command=self.on_search_button_click)
+        self.clear_database_button = ctk.CTkButton(self.bottom_frame, text='Clear Database', command=self.clear_database)
 
         self.add_author_button = ctk.CTkButton(self.bottom_frame, text="Add Author", command=self.on_add_author_click)
         self.edit_author_button = ctk.CTkButton(self.bottom_frame, text="Edit Author",
                                                 command=self.on_edit_author_click)
-        self.delete_author_button = ctk.CTkButton(self.bottom_frame, text="Delete Author", command=self.on_delete_author_click)
+        self.delete_author_button = ctk.CTkButton(self.bottom_frame, text="Delete Author",
+                                                  command=self.on_delete_author_click)
 
         self.tv_books = ttk.Treeview(self.win, height=10, show="headings")
         self.tv_authors = ttk.Treeview(self.win, height=10, show="headings")
@@ -49,7 +61,7 @@ class MainScreen(tk.Toplevel):
         self.db = db.DatabaseManager()
 
         self.db.create_database()
-        #self.db.fill_database()
+        # self.db.fill_database()
         self.insert_dummy_data()
 
         if parent.usernameEntry.get() == "user":
@@ -73,13 +85,32 @@ class MainScreen(tk.Toplevel):
         item_id = self.tv_authors.selection()[0]
         values = self.tv_authors.item(item_id, 'values')
         author_id = values[0]
-        print(f"Navigate to Book page: {author_id}")
+        author_details = self.db.get_author_details(author_id)
 
+        if author_details:
+            AuthorDetail(self, author_details)
     def on_book_double_click(self, event):
         item_id = self.tv_books.selection()[0]
         values = self.tv_books.item(item_id, 'values')
         book_id = values[0]
-        print(f"Navigate to Author page: {book_id}")
+        book_details = self.db.get_book_details(book_id)
+
+        if book_details:
+            BookDetail(self, book_details)
+
+    def show_author_detail(self, author_id, author_name):
+
+        book_list = self.db.get_books_by_author(author_id)
+
+        detail_window = AuthorDetail(author_name, book_list)
+
+        detail_window.mainloop()
+
+    def show_book_detail(self, book_id, book_name, author_name):
+
+        book_details = self.db.get_book_details(book_id)
+        detail_window = BookDetail(book_name, author_name, book_details)
+        detail_window.mainloop()
 
     def on_edit_book_click(self):
 
@@ -91,22 +122,20 @@ class MainScreen(tk.Toplevel):
                                                  , author_name=selected_item_row[2], rowid=selected_row_id
                                                  )
 
-
     def on_edit_author_click(self):
 
         selected_row_id = self.tv_authors.selection()[0]
         selected_item_row = self.tv_authors.item(selected_row_id)["values"]
 
         self.edit_author_page = edit_author.EditAuthor(parent=self, aid=int(selected_item_row[0])
-                                                       , name=selected_item_row[1], rowid=selected_row_id, callback=self.update_books_treeview)
-
+                                                       , name=selected_item_row[1], rowid=selected_row_id,
+                                                       callback=self.update_books_treeview)
 
     def on_add_book_click(self):
         self.add_book_page = add_book.AddBook(parent=self, callback=self.update_books_treeview)
+
     def on_add_author_click(self):
         self.add_author_page = add_author.AddAuthor(parent=self, callback=self.update_authors_treeview)
-
-
 
     def on_delete_book_click(self):
         selected_row_id = self.tv_books.selection()[0]
@@ -129,7 +158,8 @@ class MainScreen(tk.Toplevel):
 
             self.update_books_treeview()
 
-
+    def on_search_button_click(self):
+        self.search_page = search_page.SearchPage(self)
 
     def is_user(self):
         self.add_book_button.configure(state=ctk.DISABLED)
@@ -141,14 +171,16 @@ class MainScreen(tk.Toplevel):
         self.delete_author_button.configure(state=ctk.DISABLED)
 
     def create_buttons(self):
-        self.add_book_button.pack(side=ctk.LEFT, pady=(20, 0))
-        self.edit_book_button.pack(side=ctk.LEFT, pady=(20, 0))
-        self.delete_book_button.pack(side=ctk.LEFT, pady=(20, 0))
+        self.add_book_button.grid(row=0, column=0, pady=(20, 0))
+        self.edit_book_button.grid(row=0, column=1, pady=(20, 0))
+        self.delete_book_button.grid(row=0, column=2, pady=(20, 0))
 
-        self.add_author_button.pack(side=ctk.LEFT, padx=(40, 0), pady=(20, 0))
-        self.edit_author_button.pack(side=ctk.LEFT, pady=(20, 0))
-        self.delete_author_button.pack(side=ctk.LEFT, pady=(20, 0))
+        self.add_author_button.grid(row=1, column=0, pady=(20, 0))
+        self.edit_author_button.grid(row=1, column=1, pady=(20, 0))
+        self.delete_author_button.grid(row=1, column=2, pady=(20, 0))
 
+        self.search_button.grid(row=2, column=0, columnspan=3, pady=(20, 0))
+        self.clear_database_button.grid(row=3, column=0, columnspan=3, pady=(20, 0))
 
     def create_authors_treeview(self):
         self.tv_authors["columns"] = ("id", "name")
@@ -194,8 +226,13 @@ class MainScreen(tk.Toplevel):
 
         authors_data = self.db.list_authors()
         for data in authors_data:
-            self.tv_authors.insert('','end', values=data)
+            self.tv_authors.insert('', 'end', values=data)
             self.author_list.append(data)
+
+    def clear_database(self):
+        self.db.clear_database()
+        self.update_authors_treeview()
+        self.update_books_treeview()
 
     def insert_dummy_data(self):
         # Insert sample data for authors

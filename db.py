@@ -1,4 +1,5 @@
 import sqlite3
+from tkinter import messagebox as msg
 
 class DatabaseManager:
     def __init__(self):
@@ -124,7 +125,54 @@ class DatabaseManager:
         cur.execute("SELECT MAX(bid) FROM books")
         max_book_id = cur.fetchone()[0]
 
-        return max_book_id        
+        return max_book_id
+
+    def search(self, search_key):
+        conn = self.get_connection()
+        cur = conn.cursor()
+
+        cur.execute("select * from authors where authorname like ?",['%' + search_key + '%'])
+        searched_authors = cur.fetchall()
+        cur.execute("select * from books where bookname like ?", ['%' + search_key + '%'])
+        searched_books = cur.fetchall()
+        searched_list = searched_authors + searched_books
+        return searched_list
+
+    def get_book_details(self, bid):
+        self.conn = self.get_connection()
+        self.cur = self.conn.cursor()
+        self.cur.execute("""
+            SELECT b.bid, b.bookname, a.aid, a.authorname
+            FROM books b
+            JOIN authors a ON b.aid = a.aid
+            WHERE b.bid = ?
+        """, [bid])
+        book_details = self.cur.fetchone()
+        self.conn.close()
+        return book_details if book_details else None
+
+    def get_author_details(self, aid):
+        self.conn = self.get_connection()
+        self.cur = self.conn.cursor()
+        self.cur.execute("""
+            SELECT a.aid, a.authorname, b.bid, b.bookname
+            FROM authors a
+            LEFT JOIN books b ON a.aid = b.aid
+            WHERE a.aid = ?
+        """, [aid])
+        author_details = self.cur.fetchall()
+        self.conn.close()
+        return author_details if author_details else None
+
+    def get_books_by_author(self, author_id):
+        self.conn = self.get_connection()
+        self.cur = self.conn.cursor()
+
+        self.cur.execute("SELECT bid, bookname FROM books WHERE aid=?", [author_id])
+        books = self.cur.fetchall()
+
+        self.conn.close()
+        return books
 
     def get_max_author_id(self):
         conn = self.get_connection()
@@ -133,5 +181,18 @@ class DatabaseManager:
         cur.execute("SELECT MAX(aid) FROM authors")
         max_book_id = cur.fetchone()[0]
 
-        return max_book_id        
+        return max_book_id
+
+    def get_authorname_by_aid(self, author_id):
+        try:
+            conn = self.get_connection()
+            cur = conn.cursor()
+            cur.execute("select authorname from authors where aid = ?", [author_id])
+            author_name_tuple = cur.fetchall()
+            author_name = author_name_tuple[0][0]
+            return author_name
+        except Exception as err:
+            msg.showerror(title='Error', message='No author found by provided ID')
+
+
 
