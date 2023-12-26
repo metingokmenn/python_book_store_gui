@@ -100,6 +100,7 @@ class DatabaseManager:
         self.conn = self.get_connection()
         self.cur = self.conn.cursor()
         self.cur.execute("delete from authors where aid=?", [aid])
+        self.cur.execute("delete from books where aid = ?", [aid])
         self.conn.commit()
 
     def edit_book(self, bid, bookname, aid):

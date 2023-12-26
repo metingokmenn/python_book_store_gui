@@ -1,8 +1,4 @@
-
 import customtkinter as ctk
-
-
-
 import main_screen as ms
 from tkinter import messagebox as msg
 
@@ -25,9 +21,6 @@ class LoginScreen:
 
     def create_widgets(self):
 
-
-
-
         self.usernameLabel = ctk.CTkLabel(self.win, text="User Name")
         self.usernameLabel.grid(row=0, column=0, sticky="ew")
         self.usernameEntry = ctk.CTkEntry(self.win)
@@ -45,8 +38,6 @@ class LoginScreen:
         self.loginButton.bind("<Button-1>", self.is_admin)
         self.win.bind("<Configure>", self.on_resize)
         self.passwordEntry.bind("<Return>", self.is_admin)
-
-
 
     def is_admin(self, event):
 
@@ -78,8 +69,6 @@ class LoginScreen:
         self.win2.grab_set()
 
         self.win.destroy()
-
-
 
 
 app = LoginScreen()

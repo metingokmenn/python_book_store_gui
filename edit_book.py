@@ -5,17 +5,17 @@ import book
 import db
 
 
-class EditBook(tk.Toplevel):
+class EditBook:
     def __init__(self, parent, bid, name, author_name, rowid):
         super().__init__()
 
         self.db = db.DatabaseManager()
-
-        self.geometry("330x165+710+290")
-        self.resizable(False, False)
+        self.win = ctk.CTk()
+        self.win.geometry("330x165+710+290")
+        self.win.resizable(False, False)
 
         self.parent = parent
-        self.protocol("WM_DELETE_WINDOW", self.close_window)
+        self.win.protocol("WM_DELETE_WINDOW", self.close_window)
 
         conn = self.db.get_connection()
         cur = conn.cursor()
@@ -28,30 +28,30 @@ class EditBook(tk.Toplevel):
         self.author_id = ctk.StringVar(value=self.edit_aid)
         self.rowid = rowid
 
-        self.id_label = ctk.CTkLabel(self, text='ID: ')
-        self.name_label = ctk.CTkLabel(self, text='Book Name: ')
-        self.author_label = ctk.CTkLabel(self, text='Author ID: ')
+        self.id_label = ctk.CTkLabel(self.win, text='ID: ')
+        self.name_label = ctk.CTkLabel(self.win, text='Book Name: ')
+        self.author_label = ctk.CTkLabel(self.win, text='Author ID: ')
 
-        self.edit_name_entry = ctk.CTkEntry(self, textvariable=self.name)
-        self.edit_id_entry = ctk.CTkEntry(self, textvariable=self.bid, state='readonly')
-        self.edit_author_entry = ctk.CTkEntry(self, textvariable=self.author_id)
+        self.edit_name_entry = ctk.CTkEntry(self.win, textvariable=self.name)
+        self.edit_id_entry = ctk.CTkEntry(self.win, textvariable=self.bid, state='readonly')
+        self.edit_author_entry = ctk.CTkEntry(self.win, textvariable=self.author_id)
 
-        self.submit_button = ctk.CTkButton(self, text='Submit Changes', command=self.submit_edit)
+        self.submit_button = ctk.CTkButton(self.win, text='Submit Changes', command=self.submit_edit)
 
-        self.title("Edit Book Page")
+        self.win.title("Edit Book Page")
 
         self.create_widgets()
 
     def create_widgets(self):
         # Configure columns to expand evenly
-        self.columnconfigure(0, weight=1)
-        self.columnconfigure(1, weight=1)
+        self.win.columnconfigure(0, weight=1)
+        self.win.columnconfigure(1, weight=1)
 
         # Configure rows to expand evenly
-        self.rowconfigure(0, weight=1)
-        self.rowconfigure(1, weight=1)
-        self.rowconfigure(2, weight=1)
-        self.rowconfigure(3, weight=1)
+        self.win.rowconfigure(0, weight=1)
+        self.win.rowconfigure(1, weight=1)
+        self.win.rowconfigure(2, weight=1)
+        self.win.rowconfigure(3, weight=1)
 
         self.id_label.grid(row=0, column=0, sticky="nsew")
         self.edit_id_entry.grid(row=0, column=1, sticky="nsew")
@@ -73,7 +73,7 @@ class EditBook(tk.Toplevel):
         self.close_window()
 
     def close_window(self):
-        self.destroy()
+        self.win.destroy()
 
 
 

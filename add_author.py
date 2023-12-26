@@ -8,38 +8,40 @@ import db
 
 
 # TO-DO Known Issue = Parent's treeview doesn't update itself properly.
-class AddAuthor(tk.Toplevel):
-    def __init__(self, parent):
+class AddAuthor:
+    def __init__(self, parent, callback):
         super().__init__()
 
         self.db = db.DatabaseManager()
+        self.win = ctk.CTk()
 
-        self.geometry("330x165+710+290")
-        self.resizable(False, False)
+        self.win.geometry("330x165+710+290")
+        self.win.resizable(False, False)
 
         self.parent = parent
-        self.protocol("WM_DELETE_WINDOW", self.close_window)
+        self.win.protocol("WM_DELETE_WINDOW", self.close_window)
+        self.callback = callback
 
         self.author_name = ctk.StringVar()
 
-        self.author_label = ctk.CTkLabel(self, text='Author Name: ')
+        self.author_label = ctk.CTkLabel(self.win, text='Author Name: ')
 
-        self.edit_author_entry = ctk.CTkEntry(self, textvariable=self.author_name)
+        self.edit_author_entry = ctk.CTkEntry(self.win, textvariable=self.author_name)
 
-        self.add_button = ctk.CTkButton(self, text='Add Author', command=self.submit_add)
+        self.add_button = ctk.CTkButton(self.win, text='Add Author', command=self.submit_add)
 
-        self.title("Add Author Page")
+        self.win.title("Add Author Page")
 
         self.create_widgets()
 
     def create_widgets(self):
         # Configure columns to expand evenly
-        self.columnconfigure(0, weight=1)
-        self.columnconfigure(1, weight=1)
+        self.win.columnconfigure(0, weight=1)
+        self.win.columnconfigure(1, weight=1)
 
         # Configure rows to expand evenly
-        self.rowconfigure(0, weight=1)
-        self.rowconfigure(1, weight=1)
+        self.win.rowconfigure(0, weight=1)
+        self.win.rowconfigure(1, weight=1)
 
         self.author_label.grid(row=0, column=0, sticky="s")
         self.edit_author_entry.grid(row=0, column=1, sticky="s")
@@ -58,7 +60,8 @@ class AddAuthor(tk.Toplevel):
                 max_author_id = 0
 
             self.db.add_author(self.author_name.get())
-            self.parent.tv_authors.insert('', 'end', values=(max_author_id + 1, self.author_name.get()))
+            #self.parent.tv_authors.insert('', 'end', values=(max_author_id + 1, self.author_name.get()))
+            self.callback()
             self.close_window()
 
         except sqlite3.Error as err:
@@ -68,4 +71,4 @@ class AddAuthor(tk.Toplevel):
             conn.close()
 
     def close_window(self):
-        self.destroy()
+        self.win.destroy()

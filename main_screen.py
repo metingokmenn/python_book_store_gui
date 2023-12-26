@@ -23,7 +23,8 @@ class MainScreen(tk.Toplevel):
         self.win.title('Main Screen')
         self.win.geometry(full_screen(self.win))
         self.win.resizable(True, True)
-        ctk.set_appearance_mode("dark")
+
+        ctk.set_appearance_mode("system")
 
         self.book_list = []
         self.author_list = []
@@ -41,10 +42,6 @@ class MainScreen(tk.Toplevel):
         self.edit_author_button = ctk.CTkButton(self.bottom_frame, text="Edit Author",
                                                 command=self.on_edit_author_click)
         self.delete_author_button = ctk.CTkButton(self.bottom_frame, text="Delete Author", command=self.on_delete_author_click)
-
-        self.book_id_label = ctk.CTkLabel(self.bottom_frame, text=f"Book id: ")
-        self.book_name_label = ctk.CTkLabel(self.bottom_frame, text=f"Book name: ")
-        self.author_name_label = ctk.CTkLabel(self.bottom_frame, text=f"Author name: ")
 
         self.tv_books = ttk.Treeview(self.win, height=10, show="headings")
         self.tv_authors = ttk.Treeview(self.win, height=10, show="headings")
@@ -65,9 +62,8 @@ class MainScreen(tk.Toplevel):
         self.create_widgets()
 
     def create_widgets(self):
-        self.bottom_frame.pack(side=tk.RIGHT, anchor="ne", pady=(20, 0), padx=(0, 20))
+        self.bottom_frame.pack(side=ctk.RIGHT, anchor="ne", pady=(20, 0), padx=(0, 20))
 
-        self.create_labels()
         self.create_buttons()
 
         self.create_books_treeview()
@@ -94,7 +90,7 @@ class MainScreen(tk.Toplevel):
                                                  , name=selected_item_row[1]
                                                  , author_name=selected_item_row[2], rowid=selected_row_id
                                                  )
-        self.edit_book_page.grab_set()
+
 
     def on_edit_author_click(self):
 
@@ -103,18 +99,14 @@ class MainScreen(tk.Toplevel):
 
         self.edit_author_page = edit_author.EditAuthor(parent=self, aid=int(selected_item_row[0])
                                                        , name=selected_item_row[1], rowid=selected_row_id, callback=self.update_books_treeview)
-        self.edit_author_page.grab_set()
+
 
     def on_add_book_click(self):
-
-        self.add_book_page = add_book.AddBook(parent=self)
-
-        self.add_book_page.grab_set()
-
+        self.add_book_page = add_book.AddBook(parent=self, callback=self.update_books_treeview)
     def on_add_author_click(self):
-        self.add_author_page = add_author.AddAuthor(parent=self)
+        self.add_author_page = add_author.AddAuthor(parent=self, callback=self.update_authors_treeview)
 
-        self.add_author_page.grab_set()
+
 
     def on_delete_book_click(self):
         selected_row_id = self.tv_books.selection()[0]
@@ -132,32 +124,31 @@ class MainScreen(tk.Toplevel):
         selected_item = self.tv_authors.selection()
         if selected_item:
             self.tv_authors.delete(selected_item)
+
             self.db.delete_author(int(selected_author_id))
+
+            self.update_books_treeview()
 
 
 
     def is_user(self):
-        self.add_book_button.configure(state=tk.DISABLED)
-        self.edit_book_button.configure(state=tk.DISABLED)
-        self.delete_book_button.configure(state=tk.DISABLED)
+        self.add_book_button.configure(state=ctk.DISABLED)
+        self.edit_book_button.configure(state=ctk.DISABLED)
+        self.delete_book_button.configure(state=ctk.DISABLED)
 
-        self.add_author_button.configure(state=tk.DISABLED)
-        self.edit_author_button.configure(state=tk.DISABLED)
-        self.delete_author_button.configure(state=tk.DISABLED)
+        self.add_author_button.configure(state=ctk.DISABLED)
+        self.edit_author_button.configure(state=ctk.DISABLED)
+        self.delete_author_button.configure(state=ctk.DISABLED)
 
     def create_buttons(self):
-        self.add_book_button.pack(side=tk.LEFT, pady=(20, 0))
-        self.edit_book_button.pack(side=tk.LEFT, pady=(20, 0))
-        self.delete_book_button.pack(side=tk.LEFT, pady=(20, 0))
+        self.add_book_button.pack(side=ctk.LEFT, pady=(20, 0))
+        self.edit_book_button.pack(side=ctk.LEFT, pady=(20, 0))
+        self.delete_book_button.pack(side=ctk.LEFT, pady=(20, 0))
 
-        self.add_author_button.pack(side=tk.LEFT, padx=(40, 0), pady=(20, 0))
-        self.edit_author_button.pack(side=tk.LEFT, pady=(20, 0))
-        self.delete_author_button.pack(side=tk.LEFT, pady=(20, 0))
+        self.add_author_button.pack(side=ctk.LEFT, padx=(40, 0), pady=(20, 0))
+        self.edit_author_button.pack(side=ctk.LEFT, pady=(20, 0))
+        self.delete_author_button.pack(side=ctk.LEFT, pady=(20, 0))
 
-    def create_labels(self):
-        self.book_id_label.pack(padx=(0, 500), pady=(20, 0), anchor="nw")
-        self.book_name_label.pack(padx=(0, 500), pady=(20, 0), anchor="nw")
-        self.author_name_label.pack(padx=(0, 500), pady=(20, 0), anchor="nw")
 
     def create_authors_treeview(self):
         self.tv_authors["columns"] = ("id", "name")
@@ -172,6 +163,7 @@ class MainScreen(tk.Toplevel):
         self.tv_authors.bind("<Double-1>", self.on_author_double_click)
 
     def create_books_treeview(self):
+
         self.tv_books["columns"] = ("id", "name", "author_name")
         self.tv_books.pack(fill="both", expand=True)
 
@@ -195,6 +187,15 @@ class MainScreen(tk.Toplevel):
         for data in books_data:
             self.tv_books.insert('', 'end', values=data)
             self.book_list.append(data)
+
+    def update_authors_treeview(self):
+        for item in self.tv_authors.get_children():
+            self.tv_authors.delete(item)
+
+        authors_data = self.db.list_authors()
+        for data in authors_data:
+            self.tv_authors.insert('','end', values=data)
+            self.author_list.append(data)
 
     def insert_dummy_data(self):
         # Insert sample data for authors
