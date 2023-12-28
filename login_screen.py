@@ -1,5 +1,7 @@
 import customtkinter as ctk
 import main_screen as ms
+import tkinter as tk
+import langpack
 from tkinter import messagebox as msg
 
 
@@ -11,6 +13,10 @@ class LoginScreen:
         ctk.set_appearance_mode("dark")
         self.win.resizable(False, False)
         self.win.title('Login')
+
+        self.bind_widgets()
+        self.selected_language = tk.StringVar(value="en")
+        self.i18n = langpack.I18N(self.selected_language.get())
 
         self.usernameLabel = None
         self.usernameEntry = None
@@ -38,6 +44,26 @@ class LoginScreen:
         self.loginButton.bind("<Button-1>", self.is_admin)
         self.win.bind("<Configure>", self.on_resize)
         self.passwordEntry.bind("<Return>", self.is_admin)
+
+        self.context_menu = tk.Menu(self.win, tearoff=False)
+        self.context_menu.add_radiobutton(label="English", variable=self.selected_language, value="en",
+                                          command=lambda: self.reload_gui_text("en"))
+        self.context_menu.add_radiobutton(label="Türkçe", variable=self.selected_language, value="tr",
+                                          command=lambda: self.reload_gui_text("tr"))
+
+    def reload_gui_text(self,language):
+        self.i18n = langpack.I18N(language)
+        self.win.title(self.i18n.logintitle)
+        self.usernameLabel.configure(text=self.i18n.username)
+        self.passwordLabel.configure(text=self.i18n.password)
+        self.loginButton.configure(text=self.i18n.login)
+
+
+    def bind_widgets(self):
+        self.win.bind("<Button-2>", self.show_context_menu)
+
+    def show_context_menu(self,event):
+        self.context_menu.tk_popup(x=event.x_root, y=event.y_root)
 
     def is_admin(self, event):
 

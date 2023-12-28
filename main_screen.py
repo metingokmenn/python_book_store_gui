@@ -13,6 +13,9 @@ from author_detail import AuthorDetail
 from book_detail import BookDetail
 from full_screen import full_screen
 
+import langpack
+
+
 
 class MainScreen(tk.Toplevel):
     def __init__(self, parent):
@@ -29,6 +32,10 @@ class MainScreen(tk.Toplevel):
         self.win.title('Main Screen')
         self.win.geometry(full_screen(self.win))
         self.win.resizable(True, True)
+
+        self.bind_widgets()
+        self.selected_language = ctk.StringVar(value="tr")
+        self.i18n = langpack.I18N(self.selected_language.get())
 
         ctk.set_appearance_mode("system")
 
@@ -73,11 +80,39 @@ class MainScreen(tk.Toplevel):
 
         self.create_widgets()
 
+    def set_selected_language(self, language):
+        self.selected_language.set(language)
+        self.reload_gui_text(language)
+
+    def reload_gui_text(self,language):
+        self.i18n = langpack.I18N(language)
+        self.win.title(self.i18n.maintitle)
+        self.add_book_button.configure(text=self.i18n.addbook)
+        self.edit_book_button.configure(text=self.i18n.editbook)
+        self.delete_book_button.configure(text=self.i18n.deletebook)
+        self.search_button.configure(text=self.i18n.search)
+        self.clear_database_button.configure(text=self.i18n.cleardatabase)
+        self.add_author_button.configure(text=self.i18n.addauthor)
+        self.edit_author_button.configure(text=self.i18n.editauthor)
+        self.delete_author_button.configure(text=self.i18n.deleteauthor)
+
+    def bind_widgets(self):
+        self.win.bind("<Button-2>", self.show_context_menu)
+
+    def show_context_menu(self,event):
+        self.context_menu.tk_popup(x=event.x_root, y=event.y_root)
+
     def create_widgets(self):
         self.bottom_frame.pack(side=ctk.RIGHT, anchor="ne", pady=(20, 0), padx=(0, 20))
 
         self.create_buttons()
 
+        self.context_menu = tk.Menu(self.win, tearoff=False)
+        self.context_menu.add_radiobutton(label="English", variable=self.selected_language, value="en",
+                                          command=lambda: self.reload_gui_text("en"))
+        self.context_menu.add_radiobutton(label="Türkçe", variable=self.selected_language, value="tr",
+                                          command=lambda: self.reload_gui_text("tr"))
+        
         self.create_books_treeview()
         self.create_authors_treeview()
 
@@ -159,7 +194,8 @@ class MainScreen(tk.Toplevel):
             self.update_books_treeview()
 
     def on_search_button_click(self):
-        self.search_page = search_page.SearchPage(self)
+        self.search_page = search_page.SearchPage(self, self.selected_language.get())
+        self.search_page.set_selected_language(self.selected_language.get())
 
     def is_user(self):
         self.add_book_button.configure(state=ctk.DISABLED)
