@@ -5,11 +5,12 @@ from tkinter import messagebox as msg
 import author
 import book
 import db
+import langpack
 
 
 # TO-DO Known Issue = Parent's treeview doesn't update itself properly.
 class AddAuthor:
-    def __init__(self, parent, callback):
+    def __init__(self, parent, callback,language):
         super().__init__()
 
         self.db = db.DatabaseManager()
@@ -21,7 +22,7 @@ class AddAuthor:
         self.parent = parent
         self.win.protocol("WM_DELETE_WINDOW", self.close_window)
         self.callback = callback
-
+        self.language = language
         self.author_name = ctk.StringVar()
 
         self.author_label = ctk.CTkLabel(self.win, text='Author Name: ')
@@ -48,6 +49,14 @@ class AddAuthor:
 
         self.add_button.grid(row=1, column=0, columnspan=2, pady=(20, 0))
 
+        self.reload_gui_text()
+
+    def reload_gui_text(self):
+        self.i18n = langpack.I18N(self.language)
+        self.win.title(self.i18n.aaptitle)
+        self.author_label.configure(text=self.i18n.authorname)
+        self.add_button.configure(text=self.i18n.addauthor)
+
     def submit_add(self):
         global conn
         try:
@@ -65,7 +74,7 @@ class AddAuthor:
             self.close_window()
 
         except sqlite3.Error as err:
-            msg.showwarning(title='Error', message='An error occurred: {}'.format(err))
+            msg.showwarning(title=self.i18n.error, message=f'{self.i18n.errmessage}: {err}')
 
         finally:
             conn.close()

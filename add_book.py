@@ -5,11 +5,12 @@ from tkinter import messagebox as msg
 import author
 import book
 import db
+import langpack
 
 
 # TO-DO Known Issue = Parent's treeview doesn't update itself properly.
 class AddBook:
-    def __init__(self, parent, callback):
+    def __init__(self, parent, callback, language):
         super().__init__()
 
         self.db = db.DatabaseManager()
@@ -20,6 +21,7 @@ class AddBook:
         self.parent = parent
         self.win.protocol("WM_DELETE_WINDOW", self.close_window)
         self.callback = callback
+        self.language = language
 
         self.name = ctk.StringVar()
         self.author_name = ctk.StringVar()
@@ -53,6 +55,15 @@ class AddBook:
 
         self.add_button.grid(row=2, column=0, columnspan=2, pady=(20, 0))
 
+        self.reload_gui_text()
+
+    def reload_gui_text(self):
+        self.i18n = langpack.I18N(self.language)
+        self.win.title(self.i18n.abptitle)
+        self.name_label.configure(text=self.i18n.bookname)
+        self.author_label.configure(text=self.i18n.authorname)
+        self.add_button.configure(text=self.i18n.addbook)
+
     def submit_add(self):
         global conn
         try:
@@ -63,21 +74,21 @@ class AddBook:
 
             max_book_id = self.db.get_max_book_id()
 
-            if(max_book_id is None):
+            if (max_book_id is None):
                 max_book_id = 0
 
             if not edited_author_id_tuple:
-                msg.showwarning(title='Error', message='Author not found. Please create the author or check the author name.')
+                msg.showwarning(title=self.i18n.error, message=self.i18n.errmessage)
                 return
 
             edited_author_id = edited_author_id_tuple[0][0]
             self.db.add_book(self.name.get(), edited_author_id)
-            #self.parent.tv_books.insert('', 'end', values=(max_book_id + 1, self.name.get(), self.author_name.get()))
+            # self.parent.tv_books.insert('', 'end', values=(max_book_id + 1, self.name.get(), self.author_name.get()))
             self.callback()
             self.close_window()
 
         except sqlite3.Error as err:
-            msg.showwarning(title='Error', message='An error occurred: {}'.format(err))
+            msg.showwarning(title=self.i18n.error, message=f'{self.i18n.errmessage}: {err}')
 
         finally:
             conn.close()

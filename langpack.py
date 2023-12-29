@@ -41,7 +41,9 @@ class I18N:
         self.submitchanges = "Submit Changes"
         self.name = "Name"
         self.cleardatabase = "Clear Database"
-
+        self.bookid = "Book ID"
+        self.error = "Error"
+        self.errmessage = "An error occured"
         
 
     def load_data_in_turkish(self):
@@ -69,6 +71,9 @@ class I18N:
         self.submitchanges = "Değişiklikleri Kaydet"
         self.name = "Ad"
         self.cleardatabase = "Tüm yazar ve kitapları sil"
+        self.bookid = "Kitap ID"
+        self.error = "Hata"
+        self.errmessage = "Bir hata oluştu"
 
     def load_data_from_file(self, lang):
         lang_data = {}
@@ -102,6 +107,9 @@ class I18N:
         self.submitchanges = lang_data["submitchanges"]
         self.name = lang_data["name"]
         self.cleardatabase = lang_data["cleardatabase"]
+        self.bookid = lang_data["bookid"]
+        self.error = lang_data["error"]
+        self.errmessage = lang_data["errmessage"]
 
     @staticmethod
     def get_available_languages():

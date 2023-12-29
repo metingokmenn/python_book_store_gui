@@ -131,7 +131,7 @@ class DatabaseManager:
         conn = self.get_connection()
         cur = conn.cursor()
 
-        cur.execute("select * from authors where authorname like ?",['%' + search_key + '%'])
+        cur.execute("select * from authors where authorname like ?", ['%' + search_key + '%'])
         searched_authors = cur.fetchall()
         cur.execute("select * from books where bookname like ?", ['%' + search_key + '%'])
         searched_books = cur.fetchall()

@@ -3,10 +3,11 @@ import customtkinter as ctk
 import author
 import book
 import db
+import langpack
 
 
 class EditBook:
-    def __init__(self, parent, bid, name, author_name, rowid):
+    def __init__(self, parent, bid, name, author_name, rowid, language):
         super().__init__()
 
         self.db = db.DatabaseManager()
@@ -27,6 +28,7 @@ class EditBook:
         self.name = ctk.StringVar(value=name)
         self.author_id = ctk.StringVar(value=self.edit_aid)
         self.rowid = rowid
+        self.language = language
 
         self.id_label = ctk.CTkLabel(self.win, text='ID: ')
         self.name_label = ctk.CTkLabel(self.win, text='Book Name: ')
@@ -61,6 +63,15 @@ class EditBook:
         self.edit_author_entry.grid(row=2, column=1, sticky="nsew")
 
         self.submit_button.grid(row=3, column=0, columnspan=2, pady=(20, 0))
+
+        self.reload_gui_text()
+
+    def reload_gui_text(self):
+        self.i18n = langpack.I18N(self.language)
+        self.win.title(self.i18n.ebptitle)
+        self.name_label.configure(text=self.i18n.bookname)
+        self.author_label.configure(text=self.i18n.authorid)
+        self.submit_button.configure(text=self.i18n.submitchanges)
 
     def submit_edit(self):
         edited_author_name = self.db.get_authorname_by_aid(self.author_id.get())

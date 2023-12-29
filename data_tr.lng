@@ -22,3 +22,6 @@ authorid=Yazar ID
 submitchanges=Değişiklikleri Kaydet
 name=Ad
 cleardatabase=Tüm Yazar ve Kitapları Sil
+bookid=Kitap ID
+error=Hata
+errmessage=Bir hata oluştu

@@ -34,7 +34,7 @@ class MainScreen(tk.Toplevel):
         self.win.resizable(True, True)
 
         self.bind_widgets()
-        self.selected_language = ctk.StringVar(value="tr")
+        self.selected_language = ctk.StringVar(value="en")
         self.i18n = langpack.I18N(self.selected_language.get())
 
         ctk.set_appearance_mode("system")
@@ -82,10 +82,10 @@ class MainScreen(tk.Toplevel):
 
     def set_selected_language(self, language):
         self.selected_language.set(language)
-        self.reload_gui_text(language)
+        self.reload_gui_text()
 
-    def reload_gui_text(self,language):
-        self.i18n = langpack.I18N(language)
+    def reload_gui_text(self):
+        self.i18n = langpack.I18N(self.selected_language.get())
         self.win.title(self.i18n.maintitle)
         self.add_book_button.configure(text=self.i18n.addbook)
         self.edit_book_button.configure(text=self.i18n.editbook)
@@ -109,9 +109,9 @@ class MainScreen(tk.Toplevel):
 
         self.context_menu = tk.Menu(self.win, tearoff=False)
         self.context_menu.add_radiobutton(label="English", variable=self.selected_language, value="en",
-                                          command=lambda: self.reload_gui_text("en"))
+                                          command=lambda: self.set_selected_language("en"))
         self.context_menu.add_radiobutton(label="Türkçe", variable=self.selected_language, value="tr",
-                                          command=lambda: self.reload_gui_text("tr"))
+                                          command=lambda: self.set_selected_language("tr"))
         
         self.create_books_treeview()
         self.create_authors_treeview()
@@ -123,7 +123,7 @@ class MainScreen(tk.Toplevel):
         author_details = self.db.get_author_details(author_id)
 
         if author_details:
-            AuthorDetail(self, author_details)
+            AuthorDetail(self, author_details, self.selected_language.get())
     def on_book_double_click(self, event):
         item_id = self.tv_books.selection()[0]
         values = self.tv_books.item(item_id, 'values')
@@ -131,7 +131,7 @@ class MainScreen(tk.Toplevel):
         book_details = self.db.get_book_details(book_id)
 
         if book_details:
-            BookDetail(self, book_details)
+            BookDetail(self, book_details, self.selected_language.get())
 
     def show_author_detail(self, author_id, author_name):
 
@@ -154,7 +154,7 @@ class MainScreen(tk.Toplevel):
 
         self.edit_book_page = edit_book.EditBook(parent=self, bid=int(selected_item_row[0])
                                                  , name=selected_item_row[1]
-                                                 , author_name=selected_item_row[2], rowid=selected_row_id
+                                                 , author_name=selected_item_row[2], rowid=selected_row_id, language=self.selected_language.get()
                                                  )
 
     def on_edit_author_click(self):
@@ -164,13 +164,13 @@ class MainScreen(tk.Toplevel):
 
         self.edit_author_page = edit_author.EditAuthor(parent=self, aid=int(selected_item_row[0])
                                                        , name=selected_item_row[1], rowid=selected_row_id,
-                                                       callback=self.update_books_treeview)
+                                                       callback=self.update_books_treeview, language=self.selected_language.get())
 
     def on_add_book_click(self):
-        self.add_book_page = add_book.AddBook(parent=self, callback=self.update_books_treeview)
+        self.add_book_page = add_book.AddBook(parent=self, callback=self.update_books_treeview, language=self.selected_language.get())
 
     def on_add_author_click(self):
-        self.add_author_page = add_author.AddAuthor(parent=self, callback=self.update_authors_treeview)
+        self.add_author_page = add_author.AddAuthor(parent=self, callback=self.update_authors_treeview, language=self.selected_language.get())
 
     def on_delete_book_click(self):
         selected_row_id = self.tv_books.selection()[0]
@@ -194,8 +194,9 @@ class MainScreen(tk.Toplevel):
             self.update_books_treeview()
 
     def on_search_button_click(self):
+        print(f'"{self.selected_language.get()}"')
         self.search_page = search_page.SearchPage(self, self.selected_language.get())
-        self.search_page.set_selected_language(self.selected_language.get())
+
 
     def is_user(self):
         self.add_book_button.configure(state=ctk.DISABLED)
@@ -223,7 +224,7 @@ class MainScreen(tk.Toplevel):
         self.tv_authors.pack(fill="both", expand=True)
 
         self.tv_authors.heading("id", text="ID", anchor="center")
-        self.tv_authors.heading("name", text="Author Name", anchor="center")
+        self.tv_authors.heading("name", text=self.i18n.authorname, anchor="center")
 
         self.tv_authors.column("id", anchor="center", width=45)
         self.tv_authors.column("name", anchor="w", width=135)
@@ -236,8 +237,8 @@ class MainScreen(tk.Toplevel):
         self.tv_books.pack(fill="both", expand=True)
 
         self.tv_books.heading("id", text="ID", anchor="center")
-        self.tv_books.heading("name", text="Book Name", anchor="center")
-        self.tv_books.heading("author_name", text="Author Name", anchor="center")
+        self.tv_books.heading("name", text=self.i18n.bookname, anchor="center")
+        self.tv_books.heading("author_name", text=self.i18n.authorname, anchor="center")
 
         self.tv_books.column("id", anchor="center", width=45)
         self.tv_books.column("name", anchor="w", width=135)

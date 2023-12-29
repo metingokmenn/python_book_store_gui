@@ -1,11 +1,11 @@
-import tkinter as tk
-import customtkinter as ctk
 
+import customtkinter as ctk
+import langpack
 import db
 
 
 class SearchPage:
-    def __init__(self, parent):
+    def __init__(self, parent, language):
         super().__init__()
         self.parent = parent
 
@@ -15,6 +15,7 @@ class SearchPage:
         self.win.geometry("765x450+710+150")
 
         self.db = db.DatabaseManager()
+        self.language = language
         self.searched_list = []
         self.search_result_label_text = ''
         self.search_key = ctk.StringVar()
@@ -26,11 +27,21 @@ class SearchPage:
 
         self.create_widgets()
 
+
+
     def create_widgets(self):
+
         self.search_label.pack()
         self.search_entry.pack(pady=(30, 30))
         self.search_button.pack()
         self.search_result_label.pack(pady=(30, 0))
+        self.reload_gui_text()
+
+    def reload_gui_text(self):
+        self.i18n = langpack.I18N(self.language)
+        self.win.title(self.i18n.sptitle)
+        self.search_button.configure(text=self.i18n.search)
+        self.search_label.configure(text=self.i18n.sptitle)
 
     def on_search(self):
         self.searched_list = self.db.search(self.search_key.get())
@@ -40,14 +51,12 @@ class SearchPage:
 
             if item is not None:
                 if len(item) == 2:
-                    self.search_result_label_text += f"Author ID: {item[0]}, Author name: {item[1]}\n"
+                    self.search_result_label_text += f"{self.i18n.authorid}: {item[0]}, {self.i18n.authorname}: {item[1]}\n"
                 if len(item) == 3:
                     author_name = self.db.get_authorname_by_aid(item[2])
-                    self.search_result_label_text += f"Book ID: {item[0]}, Book name: {item[1]}, Author name: {author_name}\n"
+                    self.search_result_label_text += f"{self.i18n.bookid}: {item[0]}, {self.i18n.bookname}: {item[1]}, {self.i18n.authorname}: {author_name}\n"
 
         self.search_result_label.configure(text=self.search_result_label_text)
-
-
 
 
     def close_window(self):

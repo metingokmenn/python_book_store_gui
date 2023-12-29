@@ -22,3 +22,6 @@ authorid=Author ID
 submitchanges=Submit Changes
 name=Name
 cleardatabase=Clear Database
+bookid=Book ID
+error=Error
+errmessage=An error occured
