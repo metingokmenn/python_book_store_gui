@@ -1,6 +1,7 @@
 logintitle=Login
 maintitle=Main Screen
 abptitle=Add Book Page
+adptitle=Author Detail Page
 ebptitle=Edit Book Page
 aaptitle=Add Author Page
 eaptitle=Edit Author Page
@@ -25,3 +26,6 @@ cleardatabase=Clear Database
 bookid=Book ID
 error=Error
 errmessage=An error occured
+close=Close
+authorsbook=Author's Books
+bdptitle=Book Detail Page

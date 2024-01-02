@@ -1,6 +1,7 @@
 logintitle=Giriş
 maintitle=Ana Ekran
 abptitle=Kitap Ekleme
+adptitle=Yazar Detay
 ebptitle=Kitap Düzenle
 aaptitle=Yazar Ekle
 eaptitle=Yazar Düzenle
@@ -25,3 +26,6 @@ cleardatabase=Tüm Yazar ve Kitapları Sil
 bookid=Kitap ID
 error=Hata
 errmessage=Bir hata oluştu
+close=Kapat
+authorsbook=Yazarın Kitapları
+bdptitle=Kitap Detay

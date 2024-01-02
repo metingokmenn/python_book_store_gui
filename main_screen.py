@@ -207,6 +207,8 @@ class MainScreen(tk.Toplevel):
         self.edit_author_button.configure(state=ctk.DISABLED)
         self.delete_author_button.configure(state=ctk.DISABLED)
 
+        self.clear_database_button.configure(state=ctk.DISABLED)
+
     def create_buttons(self):
         self.add_book_button.grid(row=0, column=0, pady=(20, 0))
         self.edit_book_button.grid(row=0, column=1, pady=(20, 0))

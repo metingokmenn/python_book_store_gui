@@ -20,6 +20,7 @@ class I18N:
         self.logintitle = "Login"
         self.maintitle = "Main Screen"
         self.abptitle = "Add Book Page"
+        self.adptitle = "Author Detail Page"
         self.ebptitle = "Edit Book Page"
         self.aaptitle = "Add Author Page"
         self.eaptitle = "Edit Author Page"
@@ -44,12 +45,16 @@ class I18N:
         self.bookid = "Book ID"
         self.error = "Error"
         self.errmessage = "An error occured"
+        self.close = "Close"
+        self.authorsbook = "Author's Books"
+        self.bdptitle = "Book Detail Page"
         
 
     def load_data_in_turkish(self):
         self.logintitle = "Giriş"
         self.maintitle = "Ana Ekran"
         self.abptitle = "Kitap Ekleme"
+        self.adptitle = "Yazar Detay"
         self.ebptitle = "Kitap Düzenle"
         self.aaptitle = "Yazar Ekle"
         self.eaptitle = "Yazar Düzenle"
@@ -74,6 +79,11 @@ class I18N:
         self.bookid = "Kitap ID"
         self.error = "Hata"
         self.errmessage = "Bir hata oluştu"
+        self.close = "Kapat"
+        self.authorsbook = "Yazarın Kitapları"
+        self.bdptitle = "Kitap Detay"
+
+
 
     def load_data_from_file(self, lang):
         lang_data = {}
@@ -86,6 +96,7 @@ class I18N:
         self.logintitle = lang_data["logintitle"]
         self.maintitle = lang_data["maintitle"]
         self.abptitle = lang_data["abptitle"]
+        self.adptitle = lang_data["adptitle"]
         self.ebptitle = lang_data["ebptitle"]
         self.aaptitle = lang_data["aaptitle"]
         self.eaptitle = lang_data["eaptitle"]
@@ -110,6 +121,11 @@ class I18N:
         self.bookid = lang_data["bookid"]
         self.error = lang_data["error"]
         self.errmessage = lang_data["errmessage"]
+        self.close = lang_data["close"]
+        self.authorsbook = lang_data["authorsbook"]
+        self.bdptitle = lang_data["bdptitle"]
+
+
 
     @staticmethod
     def get_available_languages():
